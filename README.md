@@ -112,7 +112,7 @@ LLM-Cryptography/
 | Noita eye messages | `datasets/unsolved/noita-eye-messages/data.jsonl` | 9 | unsolved (from [Eyes](https://github.com/Null-H3x/Eyes)) |
 | Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 48 | audited |
 
-Math docs for every cipher: `docs/math-formulas/`. Ground truth links ciphers → math → datasets → property profiles.
+Math docs for every cipher: `docs/math-formulas/`. Full variable inventory: [`docs/variable-inventory.md`](docs/variable-inventory.md). Ground truth links ciphers → math → datasets → property profiles.
 
 Analyze a ciphertext from the CLI:
 

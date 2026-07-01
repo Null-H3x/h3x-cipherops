@@ -6,6 +6,7 @@ Mathematical definitions, variables, and validated Python implementations for cl
 
 | File | Description |
 |------|-------------|
+| [`../variable-inventory.md`](../variable-inventory.md) | **Full variable & field inventory** (datasets, properties, ground truth) |
 | `definitions.md` | Universal notation (P, C, K, x, k) |
 | `cipher-families.md` | Cipher taxonomy and quick reference |
 

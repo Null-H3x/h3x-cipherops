@@ -35,8 +35,11 @@ Each record in `processed/cipher-ground-truth.jsonl` includes:
 - `cipher_family`, `variant_slug`, `params`
 - `math_ref` (formula documentation path)
 - `dataset_path` (validated plaintext/ciphertext pairs, or unsolved ciphertext)
+- `properties_path` (ciphertext property profiles)
 - `audit_status`: `math_implementation_verified` (solved) or `unsolved_corpus_imported`
 - `status`: `solved` or `unsolved`
+
+See [`docs/variable-inventory.md`](../docs/variable-inventory.md) for the complete field reference.
 
 ## 📊 Datasets Overview
 
