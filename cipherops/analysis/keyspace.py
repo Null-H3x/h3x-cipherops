@@ -48,10 +48,19 @@ def estimate_keyspace(cipher_family: str, *, params: dict | None = None) -> dict
             },
         }
 
-    if family in {"gak", "xgak"}:
+    if family == "gak":
+        n = params.get("alphabet_size", 26)
+        return {
+            "exact": None,
+            "formula": f"PRNG seed → {n + 1} permutations in S_{n}",
+            "log2": None,
+            "label": f"PRNG seed × (N+1) deck perms (N={n})",
+        }
+
+    if family == "gronsfeld_autokey":
         m = len(str(params.get("numeric_key", "31415")))
         n = params.get("message_length")
-        ext = "plaintext" if family == "gak" else "ciphertext"
+        ext = params.get("extension", "plaintext")
         label = f"10^{m} (numeric priming seed)"
         if n and n > m:
             label = f"10^{m} seed; 26^{n} OTP-like (ciphertext-only, no cribs)"

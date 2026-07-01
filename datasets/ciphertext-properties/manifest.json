@@ -112,18 +112,46 @@
     "source_path": "datasets/fingerprinted/autokey-ciphertext-beaufort/data.jsonl"
   },
   {
-    "slug": "gak-31415",
+    "slug": "gronsfeld-autokey-31415",
     "count": 10,
-    "path": "datasets/ciphertext-properties/gak-31415/properties.jsonl",
+    "path": "datasets/ciphertext-properties/gronsfeld-autokey-31415/properties.jsonl",
     "corpus_type": "fingerprinted",
-    "source_path": "datasets/fingerprinted/gak-31415/data.jsonl"
+    "source_path": "datasets/fingerprinted/gronsfeld-autokey-31415/data.jsonl"
   },
   {
-    "slug": "xgak-31415",
+    "slug": "gronsfeld-autokey-ct-31415",
     "count": 10,
-    "path": "datasets/ciphertext-properties/xgak-31415/properties.jsonl",
+    "path": "datasets/ciphertext-properties/gronsfeld-autokey-ct-31415/properties.jsonl",
     "corpus_type": "fingerprinted",
-    "source_path": "datasets/fingerprinted/xgak-31415/data.jsonl"
+    "source_path": "datasets/fingerprinted/gronsfeld-autokey-ct-31415/data.jsonl"
+  },
+  {
+    "slug": "gak-ctak-right-s42",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/gak-ctak-right-s42/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/gak-ctak-right-s42/data.jsonl"
+  },
+  {
+    "slug": "gak-ptak-right-s42",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/gak-ptak-right-s42/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/gak-ptak-right-s42/data.jsonl"
+  },
+  {
+    "slug": "xgak-sum-right-s42",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/xgak-sum-right-s42/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/xgak-sum-right-s42/data.jsonl"
+  },
+  {
+    "slug": "xgak-diff-right-s42",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/xgak-diff-right-s42/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/xgak-diff-right-s42/data.jsonl"
   },
   {
     "slug": "beaufort-keyword",

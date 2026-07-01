@@ -21,7 +21,7 @@ from cipherops.analysis.fingerprint import (
 )
 from cipherops.analysis.kasiski import kasiski_examination
 from cipherops.analysis.keyspace import estimate_keyspace
-from cipherops.ciphers import classical, encoding, symbolic, transposition
+from cipherops.ciphers import classical, encoding, gak as gak_cipher, symbolic, transposition
 from cipherops.ciphers.registry import CIPHER_REGISTRY, PLAIN_SAMPLES, get_cipher
 from cipherops.ciphers.utils import mod_inverse
 from scripts.generate_datasets import _roundtrip_ok
@@ -88,14 +88,25 @@ def audit_classical_kats(report: AuditReport) -> None:
         ),
         (
             "gak roundtrip",
-            classical.gronsfeld_autokey_decrypt(classical.gronsfeld_autokey("HELLO", "31415"), "31415") == "HELLO",
+            gak_cipher.gak_decrypt_text(
+                gak_cipher.gak_encrypt_text("HELLO", mode="ctak_right", prng_seed=42),
+                mode="ctak_right",
+                prng_seed=42,
+            )
+            == "HELLO",
         ),
         (
             "xgak roundtrip",
-            classical.gronsfeld_autokey_decrypt(
-                classical.gronsfeld_autokey("HELLO", "31415", extension="ciphertext"), "31415", extension="ciphertext"
+            gak_cipher.gak_decrypt_text(
+                gak_cipher.gak_encrypt_text("HELLO", mode="xgak_sum_right", prng_seed=42),
+                mode="xgak_sum_right",
+                prng_seed=42,
             )
             == "HELLO",
+        ),
+        (
+            "gronsfeld autokey roundtrip",
+            classical.gronsfeld_autokey_decrypt(classical.gronsfeld_autokey("HELLO", "31415"), "31415") == "HELLO",
         ),
         (
             "autokey brute enumerates KEY",

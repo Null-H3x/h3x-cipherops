@@ -125,48 +125,55 @@ def _autokey_attacks(fingerprint: dict, patterns: dict, params: dict | None) -> 
     }
 
 
-def _gak_attacks(fingerprint: dict, patterns: dict, params: dict | None, family: str) -> dict[str, dict]:
+def _gronsfeld_autokey_attacks(fingerprint: dict, patterns: dict, params: dict | None) -> dict[str, dict]:
     params = params or {}
     m = len(str(params.get("numeric_key", "31415")))
-    extension = params.get("extension", "plaintext" if family == "gak" else "ciphertext")
-    label = "GAK" if family == "gak" else "XGAK"
+    extension = params.get("extension", "plaintext")
     return {
         "crib_dragging": _entry(
             "viable",
             confidence=0.9 if extension == "plaintext" else 0.85,
-            notes=f"{label}: numeric seed + {'plaintext' if extension == 'plaintext' else 'ciphertext'} shift extension (mod 10).",
+            notes=f"Gronsfeld autokey: numeric seed + {extension} shift extension (mod 10).",
             recommended_methods=["numeric seed crib", "iterative decrypt", "score prefix"],
         ),
         "brute_force": _entry(
             "partial",
             confidence=0.75,
-            notes=f"Feasible for short numeric seed |K|={m}: 10^{m} digit combinations.",
-            recommended_methods=["seed digit enumeration", "score first |K| columns"],
+            notes=f"Short numeric seed |K|={m}: 10^{m} digit combinations.",
+            recommended_methods=["seed digit enumeration"],
             key_space_estimate=f"10^{m}",
         ),
-        "dictionary": _entry(
-            "viable" if patterns.get("preserves_spaces") else "partial",
-            confidence=0.78,
-            notes="Dictionary scoring on recovered prefix; shifts limited to 0–9 after seed.",
-            recommended_methods=["prefix language score", "iterative decrypt"],
-        ),
-        "hill_climbing": _entry(
+        "dictionary": _entry("viable" if patterns.get("preserves_spaces") else "partial", confidence=0.78, notes="Prefix language scoring after seed recovery."),
+        "hill_climbing": _entry("partial", confidence=0.5, notes="Hill-climb seed digits only."),
+        "metaheuristic": _entry("partial", confidence=0.48, notes="GA over priming digits."),
+        "side_channel": _entry("unknown", confidence=0.1, notes="Classical pen-and-paper cipher."),
+    }
+
+
+def _eyes_gak_attacks(fingerprint: dict, patterns: dict, params: dict | None) -> dict[str, dict]:
+    params = params or {}
+    mode = params.get("mode", "ctak_right")
+    n = params.get("alphabet_size", 26)
+    is_xgak = str(mode).startswith("xgak_")
+    label = "XGAK" if is_xgak else "GAK"
+    return {
+        "crib_dragging": _entry(
             "partial",
-            confidence=0.5,
-            notes="Hill-climb seed digits only; body needs cribs or known plaintext.",
-            recommended_methods=["seed digit swaps"],
+            confidence=0.6,
+            notes=f"{label} (Eyes): dynamic perm ct=active[pt]; k indexes σ[k] from stream ({mode}).",
+            recommended_methods=["PRNG seed crib", "transition-table probes"],
         ),
-        "metaheuristic": _entry(
+        "brute_force": _entry(
             "partial",
-            confidence=0.48,
-            notes="GA/SA over priming digits; smaller space than alphabetic autokey.",
-            recommended_methods=["seed-only GA"],
+            confidence=0.55,
+            notes=f"PRNG seed search; full key is (N+1) perms in S_{n}.",
+            recommended_methods=["PRNG seed scan", "sigma table recovery"],
+            key_space_estimate="PRNG seed (Eyes: Park–Miller / NollaPRNG hypotheses)",
         ),
-        "side_channel": _entry(
-            "unknown",
-            confidence=0.1,
-            notes="Classical pen-and-paper cipher.",
-        ),
+        "dictionary": _entry("partial", confidence=0.5, notes="Score decrypt under candidate seed/mode."),
+        "hill_climbing": _entry("partial", confidence=0.4, notes="Permutation optimization; see Eyes §227–237 probes."),
+        "metaheuristic": _entry("viable", confidence=0.7, notes="GPU metaheuristic over PRNG seeds (Eyes EyeStat model)."),
+        "side_channel": _entry("unknown", confidence=0.1, notes="Game binary may leak PRNG constants (Noita)."),
     }
 
 
@@ -437,7 +444,7 @@ FAMILY_GROUPS = {
         "gronsfeld",
         "noita-eye",
     },
-    "non_periodic_polyalphabetic": {"autokey", "running_key", "gak", "xgak"},
+    "non_periodic_polyalphabetic": {"autokey", "running_key", "gronsfeld_autokey", "gak"},
     "transposition": {"railfence", "columnar", "scytale"},
     "polygraphic": {"playfair", "four_square", "hill"},
     "fractionated": {"adfgx", "adfgvx", "bifid", "trifid", "straddle_checkerboard", "fractionated_morse"},
@@ -479,8 +486,10 @@ def attack_surface(
     if cipher_family in FAMILY_GROUPS["non_periodic_polyalphabetic"]:
         if cipher_family == "autokey":
             return _apply_keyspace(_autokey_attacks(fingerprint, patterns, params), cipher_family, params)
-        if cipher_family in {"gak", "xgak"}:
-            return _apply_keyspace(_gak_attacks(fingerprint, patterns, params, cipher_family), cipher_family, params)
+        if cipher_family in {"gak"}:
+            return _apply_keyspace(_eyes_gak_attacks(fingerprint, patterns, params), cipher_family, params)
+        if cipher_family == "gronsfeld_autokey":
+            return _apply_keyspace(_gronsfeld_autokey_attacks(fingerprint, patterns, params), cipher_family, params)
         return _apply_keyspace(_running_key_attacks(fingerprint, patterns), cipher_family, params)
     if cipher_family in FAMILY_GROUPS["polyalphabetic"]:
         return _apply_keyspace(_polyalphabetic_attacks(fingerprint, kasiski, patterns), cipher_family, params)

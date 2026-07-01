@@ -54,8 +54,9 @@ Ciphers and systems **named in taxonomies** or **common in puzzles / history** b
 | **Great cipher** | Louis XIV | Homophonic + nulls + traps | Reference | P2 |
 | **Bazeries** | Cylinder + substitution | Dual disk system | Reference | P3 |
 | **Ciphertext-autokey** | Autokey variant | \(k_i \leftarrow c_{i-\|K\|}\) after seed | **Implemented** (`autokey-ciphertext`, `autokey-ciphertext-beaufort`) | — |
-| **GAK (Gronsfeld autokey)** | Numeric + plaintext extension | \(s_i \leftarrow p_{i-m} \bmod 10\) | **Implemented** (`gak-31415`) | — |
-| **XGAK** | Numeric + ciphertext extension | \(s_i \leftarrow c_{i-m} \bmod 10\) | **Implemented** (`xgak-31415`) | — |
+| **GAK (Eyes dynamic perm)** | Deck autokey | ct=active[pt]; σ indexed by stream | **Implemented** (Eyes model) | — |
+| **XGAK (Eyes extended)** | Deck autokey | k=(p±c) mod N indexes σ | **Implemented** (Eyes model) | — |
+| **Gronsfeld autokey** | Numeric + PT/CT extension | mod-10 shifts | **Implemented** (`gronsfeld-autokey-*`) | — |
 | **One-time pad (manual)** | Vernam | \(c_i = p_i \oplus k_i\), \(\|K\|=\|P\|\) | Reference | P3 |
 
 ---
@@ -113,7 +114,7 @@ From external classifier taxonomies — **not implemented**:
 |-----------|---------------------|
 | Simple shift | Caesar / Atbash |
 | Repeating key | Vigenère / Beaufort / Gronsfeld |
-| Non-repeating key | Autokey (4 variants), GAK, XGAK, running key |
+| Non-repeating key | Autokey (4 variants), Eyes GAK/XGAK, Gronsfeld autokey, running key |
 | Symbol substitution | Homophonic / nomenclator (partial) |
 | Digraph | Playfair / four-square |
 | Fractionation | ADFGX / bifid / trifid |

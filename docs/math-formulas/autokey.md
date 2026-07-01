@@ -14,8 +14,10 @@ Polyalphabetic ciphers where the keystream is **primed** by a short key, then **
 | `autokey-beaufort` | Plaintext | Beaufort (−) | Alphabetic |
 | `autokey-ciphertext` | Ciphertext | Vigenère (+) | Alphabetic |
 | `autokey-ciphertext-beaufort` | Ciphertext | Beaufort (−) | Alphabetic |
-| `gak-31415` | Plaintext | Gronsfeld (+) | Numeric `31415` |
-| `xgak-31415` | Ciphertext | Gronsfeld (+) | Numeric `31415` |
+| `gronsfeld-autokey-31415` | Plaintext | Gronsfeld (+) | Numeric (see [`gronsfeld-autokey.md`](gronsfeld-autokey.md)) |
+| `gronsfeld-autokey-ct-31415` | Ciphertext | Gronsfeld (+) | Numeric |
+
+**Eyes GAK/xGAK** (dynamic permutation — separate family): [`gak.md`](gak.md), [`xgak.md`](xgak.md).
 
 ---
 
@@ -57,14 +59,9 @@ Implemented as `autokey-ciphertext` and `autokey-ciphertext-beaufort`.
 
 ---
 
-## GAK / XGAK (Gronsfeld autokey)
+## GAK / XGAK (Eyes — separate family)
 
-Numeric priming seed with shifts in \(\{0,\ldots,9\}\). After seed exhaustion:
-
-- **GAK:** \(s_i = p_{i-m} \bmod 10\)
-- **XGAK:** \(s_i = c_{i-m} \bmod 10\)
-
-See dedicated docs: [`gak.md`](gak.md), [`xgak.md`](xgak.md).
+Dynamic permutation ciphers from [Null-H3x/Eyes](https://github.com/Null-H3x/Eyes) — **not** Gronsfeld autokey. See [`gak.md`](gak.md) and [`xgak.md`](xgak.md). Gronsfeld numeric autokey: [`gronsfeld-autokey.md`](gronsfeld-autokey.md).
 
 ---
 
@@ -135,8 +132,12 @@ Property profiles set `analysis_guidance.periodicity = non_periodic` and omit `c
 - `datasets/fingerprinted/autokey-beaufort/data.jsonl`
 - `datasets/fingerprinted/autokey-ciphertext/data.jsonl`
 - `datasets/fingerprinted/autokey-ciphertext-beaufort/data.jsonl`
-- `datasets/fingerprinted/gak-31415/data.jsonl`
-- `datasets/fingerprinted/xgak-31415/data.jsonl`
+- `datasets/fingerprinted/gronsfeld-autokey-31415/data.jsonl`
+- `datasets/fingerprinted/gronsfeld-autokey-ct-31415/data.jsonl`
+- `datasets/fingerprinted/gak-ctak-right-s42/data.jsonl`
+- `datasets/fingerprinted/gak-ptak-right-s42/data.jsonl`
+- `datasets/fingerprinted/xgak-sum-right-s42/data.jsonl`
+- `datasets/fingerprinted/xgak-diff-right-s42/data.jsonl`
 
 ---
 

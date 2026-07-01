@@ -28,8 +28,9 @@ Mathematical definitions, variables, and validated Python implementations for cl
 | Nomenclator | `nomenclator.md` | `nomenclator-basic` |
 | Columnar Transposition | `columnar.md` | `columnar-keyword` |
 | Autokey | `autokey.md` | `autokey-standard`, `autokey-beaufort`, `autokey-ciphertext`, `autokey-ciphertext-beaufort` |
-| GAK (Gronsfeld autokey) | `gak.md` | `gak-31415` |
-| XGAK (ciphertext GAK) | `xgak.md` | `xgak-31415` |
+| GAK (Eyes) | `gak.md` | `gak-ctak-right-s42`, `gak-ptak-right-s42` |
+| XGAK (Eyes) | `xgak.md` | `xgak-sum-right-s42`, `xgak-diff-right-s42` |
+| Gronsfeld autokey | `gronsfeld-autokey.md` | `gronsfeld-autokey-31415`, `gronsfeld-autokey-ct-31415` |
 | Beaufort | `beaufort.md` | `beaufort-keyword` |
 | Porta | `porta.md` | `porta-keyword` |
 | Running Key | `running-key.md` | `running-key-book` |

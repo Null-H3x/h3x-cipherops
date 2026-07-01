@@ -18,7 +18,7 @@ The following people and projects informed the cryptanalysis reference docs and 
 | **[@NBiermann](https://github.com/NBiermann)** | [cryptohelper-isomorphs](https://github.com/NBiermann/cryptohelper-isomorphs) | Isomorph definition, pattern significance, sliding-window algorithm ([`isomorphs-and-complements.md`](isomorphs-and-complements.md)) |
 | **[@matthewdgreen](https://github.com/matthewdgreen)** | [decipher](https://github.com/matthewdgreen/decipher) | Automated solver taxonomy: monoalphabetic, homophonic, periodic polyalphabetic, transposition+homophonic ([`isomorphs-and-complements.md`](isomorphs-and-complements.md)) |
 | **[@systemslibrarian](https://github.com/systemslibrarian)** | [cipher-detective-ai](https://github.com/systemslibrarian/cipher-detective-ai) | 81-type cipher taxonomy for gap analysis |
-| **[@Null-H3x](https://github.com/Null-H3x)** | [Eyes](https://github.com/Null-H3x/Eyes) | Noita eye corpus, in-depth keystream analysis, depth attack (`datasets/unsolved/noita-eye-messages/`) |
+| **[@Null-H3x](https://github.com/Null-H3x)** | [Eyes](https://github.com/Null-H3x/Eyes) | Noita eye corpus, GAK/xGAK kernel definitions (`eyestat_kernels.py`), depth attack (`datasets/unsolved/noita-eye-messages/`) |
 | **George Lasry** | [Friedman ring challenge](https://scienceblogs.de/klausis-krypto-kolumne/the-friedman-ring-challenge-by-george-lasry/) · [Cryptologia 2021](https://www.tandfonline.com/doi/full/10.1080/01611194.2021.1996484) | Isomorph-driven alphabet reduction example ([`isomorphs-and-complements.md`](isomorphs-and-complements.md)) |
 
 **Reviewed but not imported** (different problem domain; still credited for transparency):

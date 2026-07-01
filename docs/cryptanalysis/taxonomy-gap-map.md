@@ -127,7 +127,8 @@ These are **documented as out-of-scope** unless a specific corpus or training ne
 | Hill-climb / GA solvers | ❌ Metadata slot | |
 | Cipher classifier (`classify.py`) | ❌ Roadmap | |
 | Ciphertext-autokey variant | ✅ Implemented | `autokey-ciphertext`, `autokey-ciphertext-beaufort` |
-| GAK / XGAK (Gronsfeld autokey) | ✅ Implemented | `gak-31415`, `xgak-31415` |
+| GAK / XGAK (Gronsfeld autokey) | ✅ Implemented | `gronsfeld-autokey-*` |
+| GAK / XGAK (Eyes dynamic perm) | ✅ Implemented | `gak-*`, `xgak-*` (from [Eyes](https://github.com/Null-H3x/Eyes)) |
 | Autokey seed brute helper | ✅ Implemented | `cipherops/analysis/autokey_solver.py` |
 | Homophonic scoring engine | ❌ | Copiale / Zodiac-class |
 | Book corpus for running key | ❌ External | Only fixed excerpt in dataset |

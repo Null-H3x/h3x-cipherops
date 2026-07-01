@@ -80,14 +80,34 @@
     "path": "/workspace/datasets/fingerprinted/autokey-ciphertext-beaufort/data.jsonl"
   },
   {
-    "slug": "gak-31415",
+    "slug": "gronsfeld-autokey-31415",
     "count": 10,
-    "path": "/workspace/datasets/fingerprinted/gak-31415/data.jsonl"
+    "path": "/workspace/datasets/fingerprinted/gronsfeld-autokey-31415/data.jsonl"
   },
   {
-    "slug": "xgak-31415",
+    "slug": "gronsfeld-autokey-ct-31415",
     "count": 10,
-    "path": "/workspace/datasets/fingerprinted/xgak-31415/data.jsonl"
+    "path": "/workspace/datasets/fingerprinted/gronsfeld-autokey-ct-31415/data.jsonl"
+  },
+  {
+    "slug": "gak-ctak-right-s42",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/gak-ctak-right-s42/data.jsonl"
+  },
+  {
+    "slug": "gak-ptak-right-s42",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/gak-ptak-right-s42/data.jsonl"
+  },
+  {
+    "slug": "xgak-sum-right-s42",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/xgak-sum-right-s42/data.jsonl"
+  },
+  {
+    "slug": "xgak-diff-right-s42",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/xgak-diff-right-s42/data.jsonl"
   },
   {
     "slug": "beaufort-keyword",

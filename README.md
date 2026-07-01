@@ -84,7 +84,7 @@ LLM-Cryptography/
 │   ├── fingerprint.py      # entropy, IC, Kasiski (re-exports analysis)
 │   └── cli.py              # click-based entrypoint (`fingerprint`, `analyze`)
 ├── datasets/
-│   ├── fingerprinted/          # Validated plaintext/ciphertext pairs (57 cipher variants)
+│   ├── fingerprinted/          # Validated plaintext/ciphertext pairs (61 cipher variants)
 │   ├── ciphertext-properties/  # Cryptanalytic metadata per ciphertext record
 │   └── unsolved/               # Real-world unsolved ciphertext corpora
 ├── docs/math-formulas/         # Math definitions linked to cipher implementations
@@ -111,10 +111,10 @@ LLM-Cryptography/
 
 | Corpus | Path | Records | Status |
 |--------|------|---------|--------|
-| Fingerprinted ciphers | `datasets/fingerprinted/*/data.jsonl` | 570 (57 × 10) | solved, roundtrip-verified |
-| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 579 | fingerprint, frequency, Kasiski, coset IC, n-grams, attack surface |
+| Fingerprinted ciphers | `datasets/fingerprinted/*/data.jsonl` | 610 (61 × 10) | solved, roundtrip-verified |
+| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 619 | fingerprint, frequency, Kasiski, coset IC, n-grams, attack surface |
 | Noita eye messages | `datasets/unsolved/noita-eye-messages/data.jsonl` | 9 | unsolved (from [Eyes](https://github.com/Null-H3x/Eyes)) |
-| Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 58 (57 solved + 1 unsolved) | audited |
+| Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 62 (61 solved + 1 unsolved) | audited |
 
 Math docs for every cipher: `docs/math-formulas/`. **Encodings** (PAM-5, Hex, Manchester, …): [`docs/math-formulas/encodings-catalog.md`](docs/math-formulas/encodings-catalog.md). **Unimplemented ciphers** (VIC, Enigma, …): [`docs/math-formulas/unimplemented-ciphers.md`](docs/math-formulas/unimplemented-ciphers.md). Cryptanalysis reference: [`docs/cryptanalysis/`](docs/cryptanalysis/). Full variable inventory: [`docs/variable-inventory.md`](docs/variable-inventory.md).
 

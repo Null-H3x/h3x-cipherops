@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-NON_PERIODIC_POLYALPHABETIC = frozenset({"autokey", "running_key", "gak", "xgak"})
+NON_PERIODIC_POLYALPHABETIC = frozenset({"autokey", "running_key", "gronsfeld_autokey", "gak"})
 
 
 def _seed_length(params: dict | None) -> int:
@@ -33,18 +33,14 @@ def analysis_guidance(
     family = cipher_family.replace("-", "_")
     fingerprint = fingerprint or {}
 
-    if family in {"autokey", "gak", "xgak"}:
+    if family in {"autokey", "gronsfeld_autokey"}:
         seed_len = _seed_length(params)
         regime = _autokey_regime(message_length, seed_len)
         extension = params.get("extension", "plaintext")
         variant = params.get("variant", "standard")
-        label = family
+        label = "autokey" if family == "autokey" else "Gronsfeld autokey"
         if family == "autokey":
             label = f"autokey ({extension}, {variant})"
-        elif family == "gak":
-            label = "GAK (Gronsfeld plaintext-autokey)"
-        elif family == "xgak":
-            label = "XGAK (Gronsfeld ciphertext-autokey)"
         return {
             "periodicity": "non_periodic",
             "coset_ic_applicable": False,
@@ -68,6 +64,29 @@ def analysis_guidance(
                 "Brute-force or crib the priming key (first |K| positions) if message is short.",
                 "Known-plaintext: decrypt iteratively — each recovered letter extends keystream.",
                 "Ciphertext-only after seed: treat as OTP-like without cribs or book/key reuse.",
+            ],
+        }
+
+    if family == "gak":
+        mode = params.get("mode", "ctak_right")
+        is_xgak = mode.startswith("xgak_")
+        return {
+            "periodicity": "non_periodic",
+            "coset_ic_applicable": False,
+            "kasiski_applicable": False,
+            "friedman_applicable": False,
+            "regime": "dynamic_substitution",
+            "mode": mode,
+            "cipher_label": "XGAK (Eyes)" if is_xgak else "GAK (Eyes)",
+            "warnings": [
+                "Dynamic permutation cipher (Eyes model) — not Vigenère/autokey mod-26 addition.",
+                "Key material: PRNG seed → N+1 permutations σ[0..N] in S_N.",
+                "Do not apply periodic polyalphabetic period recovery.",
+            ],
+            "recommended_workflow": [
+                "Brute PRNG seed if search space is small (Noita hypothesis).",
+                "For mod-N: ct[p] = active[p]; active advances via σ[k] where k from pt, ct, or (pt±ct).",
+                "See Null-H3x/Eyes eyestat_kernels.py and docs/math-formulas/gak.md.",
             ],
         }
 

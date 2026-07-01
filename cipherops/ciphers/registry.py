@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from cipherops.ciphers import classical, encoding, fractionated, modern, polygraphic, symbolic, transposition
+from cipherops.ciphers import classical, encoding, fractionated, gak, modern, polygraphic, symbolic, transposition
 
 
 @dataclass(frozen=True)
@@ -111,8 +111,12 @@ def _registry() -> list[CipherSpec]:
         CipherSpec("autokey", "autokey-beaufort", lambda t: classical.autokey(t, "KEY", variant="beaufort"), lambda t: classical.autokey_decrypt(t, "KEY", variant="beaufort"), {"key": "KEY", "variant": "beaufort", "extension": "plaintext"}, "docs/math-formulas/autokey.md", 4, ("beaufort",)),
         CipherSpec("autokey", "autokey-ciphertext", lambda t: classical.autokey(t, "KEY", extension="ciphertext"), lambda t: classical.autokey_decrypt(t, "KEY", extension="ciphertext"), {"key": "KEY", "variant": "standard", "extension": "ciphertext"}, "docs/math-formulas/autokey.md", 4, ("ciphertext",)),
         CipherSpec("autokey", "autokey-ciphertext-beaufort", lambda t: classical.autokey(t, "KEY", variant="beaufort", extension="ciphertext"), lambda t: classical.autokey_decrypt(t, "KEY", variant="beaufort", extension="ciphertext"), {"key": "KEY", "variant": "beaufort", "extension": "ciphertext"}, "docs/math-formulas/autokey.md", 4, ("ciphertext", "beaufort")),
-        CipherSpec("gak", "gak-31415", lambda t: classical.gronsfeld_autokey(t, "31415"), lambda t: classical.gronsfeld_autokey_decrypt(t, "31415"), {"numeric_key": "31415", "extension": "plaintext"}, "docs/math-formulas/gak.md", 4),
-        CipherSpec("xgak", "xgak-31415", lambda t: classical.gronsfeld_autokey(t, "31415", extension="ciphertext"), lambda t: classical.gronsfeld_autokey_decrypt(t, "31415", extension="ciphertext"), {"numeric_key": "31415", "extension": "ciphertext"}, "docs/math-formulas/xgak.md", 4),
+        CipherSpec("gronsfeld_autokey", "gronsfeld-autokey-31415", lambda t: classical.gronsfeld_autokey(t, "31415"), lambda t: classical.gronsfeld_autokey_decrypt(t, "31415"), {"numeric_key": "31415", "extension": "plaintext"}, "docs/math-formulas/gronsfeld-autokey.md", 4),
+        CipherSpec("gronsfeld_autokey", "gronsfeld-autokey-ct-31415", lambda t: classical.gronsfeld_autokey(t, "31415", extension="ciphertext"), lambda t: classical.gronsfeld_autokey_decrypt(t, "31415", extension="ciphertext"), {"numeric_key": "31415", "extension": "ciphertext"}, "docs/math-formulas/gronsfeld-autokey.md", 4),
+        CipherSpec("gak", "gak-ctak-right-s42", lambda t: gak.gak_encrypt_text(t, mode="ctak_right", prng_seed=42), lambda t: gak.gak_decrypt_text(t, mode="ctak_right", prng_seed=42), {"mode": "ctak_right", "prng_seed": 42, "alphabet_size": 26}, "docs/math-formulas/gak.md", 5),
+        CipherSpec("gak", "gak-ptak-right-s42", lambda t: gak.gak_encrypt_text(t, mode="ptak_right", prng_seed=42), lambda t: gak.gak_decrypt_text(t, mode="ptak_right", prng_seed=42), {"mode": "ptak_right", "prng_seed": 42, "alphabet_size": 26}, "docs/math-formulas/gak.md", 5),
+        CipherSpec("gak", "xgak-sum-right-s42", lambda t: gak.gak_encrypt_text(t, mode="xgak_sum_right", prng_seed=42), lambda t: gak.gak_decrypt_text(t, mode="xgak_sum_right", prng_seed=42), {"mode": "xgak_sum_right", "prng_seed": 42, "alphabet_size": 26}, "docs/math-formulas/xgak.md", 5),
+        CipherSpec("gak", "xgak-diff-right-s42", lambda t: gak.gak_encrypt_text(t, mode="xgak_diff_right", prng_seed=42), lambda t: gak.gak_decrypt_text(t, mode="xgak_diff_right", prng_seed=42), {"mode": "xgak_diff_right", "prng_seed": 42, "alphabet_size": 26}, "docs/math-formulas/xgak.md", 5),
         CipherSpec("beaufort", "beaufort-keyword", lambda t: classical.beaufort(t, "KEY"), lambda t: classical.beaufort(t, "KEY"), {"key": "KEY"}, "docs/math-formulas/beaufort.md", 3),
         CipherSpec("porta", "porta-keyword", lambda t: classical.porta(t, "KEY"), lambda t: classical.porta(t, "KEY"), {"key": "KEY"}, "docs/math-formulas/porta.md", 4),
         CipherSpec("running_key", "running-key-book", lambda t: classical.running_key(t, RUNNING_KEY_TEXT), lambda t: classical.running_key_decrypt(t, RUNNING_KEY_TEXT), {"key_source": "book-excerpt"}, "docs/math-formulas/running-key.md", 4),

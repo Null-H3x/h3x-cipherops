@@ -1,61 +1,52 @@
-# GAK — Gronsfeld AutoKey
+# GAK — Dynamic Substitution (Eyes / Noita model)
 
-## Definition
+**Source:** [Null-H3x/Eyes](https://github.com/Null-H3x/Eyes) `eyestat/eyestat_kernels.py::gak_encrypt`, `gak_decrypt`.
 
-**GAK** (Gronsfeld AutoKey) combines Gronsfeld digit shifts with plaintext-autokey keystream extension.
-
-**Priming key:** numeric string \(K = d_0 d_1 \ldots d_{m-1}\), each \(d_j \in \{0,\ldots,9\}\).
-
-**Keystream shifts** \(s_i\):
+GAK is **not** Gronsfeld autokey or mod-26 Vigenère addition. It is a **dynamic permutation cipher** over alphabet size \(N\):
 
 \[
-s_i = \begin{cases}
-d_i & i < m \\
-p_{i-m} \bmod 10 & i \geq m
-\end{cases}
+c_p = \text{active}_p[p_p]
 \]
 
-where \(p_j\) is the alphabetic index (A=0) of plaintext letter \(j\).
+After each symbol, the active permutation advances by composing with a keyed permutation \(\sigma[k]\), where \(k\) is derived from the stream.
 
-**Encryption:**
+## Key material
 
-\[
-E(p_i) = (p_i + s_i) \mod 26
-\]
+PRNG seed → **\(N+1\)** permutations \(\sigma[0], \sigma[1], \ldots, \sigma[N]\) in \(S_N\):
 
-## Properties
+- \(\sigma[0]\) = initial **active** permutation
+- \(\sigma[1..N]\) = keyed update tables indexed by stream value \(k\)
 
-| Property | Value |
-|----------|-------|
-| Periodicity | **Non-periodic** |
-| Seed keyspace | \(10^m\) |
-| Shift alphabet | Digits 0–9 (Gronsfeld) |
-| Extension | Plaintext feedback (text-autokey) |
+## GAK modes (modes 0–3)
 
-Do **not** apply Kasiski / Friedman / coset IC as for periodic Vigenère or Gronsfeld.
+| Mode | Advance key \(k\) | Composition |
+|------|-------------------|-------------|
+| **ctak_right** | \(k = c_p\) | active ← active ∘ σ[k] |
+| **ctak_left** | \(k = c_p\) | active ← σ[k] ∘ active |
+| **ptak_right** | \(k = p_p\) | active ← active ∘ σ[k] |
+| **ptak_left** | \(k = p_p\) | active ← σ[k] ∘ active |
 
-## Cryptanalysis
+**CTAK** = ciphertext-autokey permutation (like classical key-autokey on permutations).  
+**PTAK** = plaintext-autokey permutation.
 
-Same regime model as alphabetic autokey ([`autokey.md`](autokey.md)):
+## This repo (mod 26 teaching instances)
 
-| Regime | Condition | Attack |
-|--------|-----------|--------|
-| Seed-dominated | \(n \leq m\) | Brute \(10^m\) numeric seed |
-| Mixed | \(m < n \leq 2m\) | Seed brute + prefix scoring |
-| OTP-like | \(n \gg m\) | Cribs / known plaintext |
+| Slug | Mode | PRNG seed |
+|------|------|-----------|
+| `gak-ctak-right-s42` | ctak_right | 42 |
+| `gak-ptak-right-s42` | ptak_right | 42 |
 
-Known plaintext at position \(j\) fixes \(s_{j+m} = p_j \bmod 10\).
+Implementation: `cipherops/ciphers/gak.py`
 
-## Python Implementation
+## Cryptanalysis (Eyes context)
 
-`cipherops/ciphers/classical.py::gronsfeld_autokey`, `gronsfeld_autokey_decrypt`
-
-## Dataset
-
-`datasets/fingerprinted/gak-31415/data.jsonl`
+- **Non-periodic** — no Vigenère period / coset IC pipeline
+- Primary attack surface: **PRNG seed brute force** (EyeStat GPU runner)
+- Noita corpus uses **N = 83**; teaching datasets use **N = 26**
+- Structural probes: Eyes §227–237 (adjacent-different-σ, transition tables)
 
 ## See also
 
-- [`xgak.md`](xgak.md) — ciphertext-autokey Gronsfeld variant
-- [`gronsfeld.md`](gronsfeld.md) — periodic numeric-key Vigenère
-- [`../cryptanalysis/non-periodic-polyalphabetic.md`](../cryptanalysis/non-periodic-polyalphabetic.md)
+- [`xgak.md`](xgak.md) — extended modes using \((p+c)\) or \((c-p) \mod N\) as key index
+- [`gronsfeld-autokey.md`](gronsfeld-autokey.md) — separate classical numeric autokey (not Eyes GAK)
+- [`../math-formulas/noita-eye.md`](../math-formulas/noita-eye.md) — unsolved corpus

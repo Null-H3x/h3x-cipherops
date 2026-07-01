@@ -1,50 +1,44 @@
-# XGAK — eXtended Gronsfeld AutoKey (ciphertext-autokey)
+# XGAK — eXtended GAK (Eyes model)
 
-## Definition
+**Source:** [Null-H3x/Eyes](https://github.com/Null-H3x/Eyes) `eyestat/eyestat_kernels.py` modes 4–7.
 
-**XGAK** extends GAK with **ciphertext-autokey** (key-autokey) feedback: after the numeric priming seed, each shift derives from the **prior ciphertext** letter, not plaintext.
+XGAK extends GAK by indexing \(\sigma[k]\) with a **combined** stream value instead of raw plaintext or ciphertext alone.
 
-**Keystream shifts** \(s_i\):
+## XGAK modes (modes 4–7)
 
-\[
-s_i = \begin{cases}
-d_i & i < m \\
-c_{i-m} \bmod 10 & i \geq m
-\end{cases}
-\]
+| Mode | Advance key \(k\) | Composition |
+|------|-------------------|-------------|
+| **xgak_sum_right** | \(k = (p + c) \mod N\) | active ← active ∘ σ[k] |
+| **xgak_sum_left** | \(k = (p + c) \mod N\) | active ← σ[k] ∘ active |
+| **xgak_diff_right** | \(k = (c - p) \mod N\) | active ← active ∘ σ[k] |
+| **xgak_diff_left** | \(k = (c - p) \mod N\) | active ← σ[k] ∘ active |
 
-**Encryption:**
+The **numerical offset** \(k\) is computed per position from the current plaintext and ciphertext symbols — this is the “numerical keystream index” in the Eyes brute-force taxonomy, **not** a repeating additive key like Vigenère.
 
-\[
-E(p_i) = (p_i + s_i) \mod 26
-\]
+## vs GAK (CTAK/PTAK)
 
-## vs GAK
+| | GAK CTAK/PTAK | XGAK |
+|---|---------------|------|
+| Key index | \(c\) or \(p\) alone | \((p+c)\) or \((c-p) \mod N\) |
+| Eyes probes | §141 CT-feedback tables | §151 relaxed transition gauntlet |
+| Near-identity σ | — | §230 XGAK slack census |
 
-| | GAK | XGAK |
-|---|-----|------|
-| Extension source | Plaintext \(p_{i-m}\) | Ciphertext \(c_{i-m}\) |
-| Decrypt dependency | Sequential; each \(p_i\) feeds forward | Sequential; each \(c_i\) feeds forward |
-| Error propagation | Wrong seed poisons body | Single decrypt error poisons all following shifts |
-| Receiver needs | Priming key only | Priming key + ciphertext (already available) |
+## This repo (mod 26)
 
-Both are **non-periodic** — periodic polyalphabetic tools do not apply.
+| Slug | Mode | PRNG seed |
+|------|------|-----------|
+| `xgak-sum-right-s42` | xgak_sum_right | 42 |
+| `xgak-diff-right-s42` | xgak_diff_right | 42 |
 
-## Cryptanalysis
+Implementation: `cipherops/ciphers/gak.py` with `mode=` parameter.
 
-- Seed brute force: \(10^m\) (same as GAK).
-- Cribs on first \(m\) positions recover numeric seed.
-- Ciphertext-autokey cribs must align with **ciphertext** letters at extension positions, not plaintext.
+## Cryptanalysis notes (from Eyes)
 
-## Python Implementation
-
-`cipherops/ciphers/classical.py::gronsfeld_autokey(..., extension="ciphertext")`
-
-## Dataset
-
-`datasets/fingerprinted/xgak-31415/data.jsonl`
+- Deterministic transition tables \(T[\text{prev}, \text{class}] \rightarrow \text{next}\) are probed in §141/§151/§237
+- XGAK allows **near-identity** σ entries on unused alphabet classes (§230)
+- Full decrypt still requires recovering all \(N+1\) permutations or the PRNG seed
 
 ## See also
 
-- [`gak.md`](gak.md) — plaintext-autokey Gronsfeld
-- [`autokey.md`](autokey.md) — alphabetic autokey family (including ciphertext-autokey)
+- [`gak.md`](gak.md) — base CTAK/PTAK modes
+- Eyes `eyestat/WORKFLOW.md` — 8-mode GAK/xGAK family listing
