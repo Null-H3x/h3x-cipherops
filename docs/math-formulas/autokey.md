@@ -2,7 +2,7 @@
 
 Polyalphabetic ciphers where the keystream is **primed** by a short key, then **extended automatically** from the message. All variants in this family are **non-periodic** — do not apply Vigenère period recovery.
 
-**Related:** [`gak.md`](gak.md) (Gronsfeld AutoKey), [`xgak.md`](xgak.md) (ciphertext Gronsfeld autokey), [`../cryptanalysis/non-periodic-polyalphabetic.md`](../cryptanalysis/non-periodic-polyalphabetic.md).
+**Related:** [`gronsfeld-autokey.md`](gronsfeld-autokey.md) (Gronsfeld numeric autokey), [`gak.md`](gak.md) / [`xgak.md`](xgak.md) (Eyes dynamic permutation — separate family), [`../cryptanalysis/non-periodic-polyalphabetic.md`](../cryptanalysis/non-periodic-polyalphabetic.md).
 
 ---
 
@@ -79,13 +79,13 @@ Autokey family ciphers are **not periodic**. Do **not** apply Kasiski, Friedman,
 
 ### Known-plaintext attack
 
-Once \(p_j\) is known (plaintext-autokey / GAK):
+Once \(p_j\) is known (plaintext-autokey or Gronsfeld plaintext-autokey):
 
 \[
 k_{j+|K|} = p_j \quad\text{or}\quad s_{j+m} = p_j \bmod 10
 \]
 
-For ciphertext-autokey / XGAK, extension uses \(c_{j+|K|}\) from ciphertext.
+For ciphertext-autokey (alphabetic or Gronsfeld), extension uses \(c_{j+|K|}\) from ciphertext.
 
 ### What does **not** work
 
@@ -99,17 +99,17 @@ For ciphertext-autokey / XGAK, extension uses \(c_{j+|K|}\) from ciphertext.
 | Variant | Seed space |
 |---------|------------|
 | Alphabetic autokey | \(26^{|K|}\) |
-| GAK / XGAK | \(10^{|K|}\) |
+| Gronsfeld autokey | \(10^{|K|}\) |
 
 See [`../cryptanalysis/keyspace-reference.md`](../cryptanalysis/keyspace-reference.md).
 
 ### Seed brute-force tooling
 
 ```python
-from cipherops.analysis.autokey_solver import brute_force_autokey_seed, brute_force_gak_seed
+from cipherops.analysis.autokey_solver import brute_force_autokey_seed, brute_force_gronsfeld_autokey_seed
 
 candidates = brute_force_autokey_seed(ciphertext, seed_length=3, extension="plaintext")
-gak_hits = brute_force_gak_seed(ciphertext, seed_length=5, extension="plaintext")
+gronsfeld_hits = brute_force_gronsfeld_autokey_seed(ciphertext, seed_length=5, extension="plaintext")
 ```
 
 ---
@@ -119,7 +119,7 @@ gak_hits = brute_force_gak_seed(ciphertext, seed_length=5, extension="plaintext"
 | Function | Variants |
 |----------|----------|
 | `classical.autokey`, `autokey_decrypt` | Alphabetic; `extension=` / `variant=` |
-| `classical.gronsfeld_autokey`, `gronsfeld_autokey_decrypt` | GAK / XGAK |
+| `classical.gronsfeld_autokey`, `gronsfeld_autokey_decrypt` | Gronsfeld autokey (plaintext/ciphertext extension) |
 | `analysis.autokey_solver.brute_force_*` | Seed enumeration helpers |
 
 Property profiles set `analysis_guidance.periodicity = non_periodic` and omit `coset_ic`.

@@ -269,10 +269,12 @@ def gronsfeld_autokey(
     extension: str = "plaintext",
 ) -> str:
     """
-    Gronsfeld AutoKey (GAK): numeric priming key, then plaintext/ciphertext extension.
+    Gronsfeld autokey: numeric priming key, then plaintext/ciphertext extension.
 
     After the seed digits, each shift is ``char_index(letter) mod 10``.
-    ``extension='ciphertext'`` is XGAK (ciphertext-autokey Gronsfeld).
+    ``extension='ciphertext'`` uses prior ciphertext letters (ciphertext-autokey Gronsfeld).
+
+    Not to be confused with Eyes GAK/XGAK (dynamic permutation ciphers in ``gak.py``).
     """
     if extension not in {"plaintext", "ciphertext"}:
         raise ValueError("Gronsfeld autokey extension must be 'plaintext' or 'ciphertext'")

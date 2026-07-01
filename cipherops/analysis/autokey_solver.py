@@ -77,14 +77,14 @@ def brute_force_autokey_seed(
     return results[:top_n]
 
 
-def brute_force_gak_seed(
+def brute_force_gronsfeld_autokey_seed(
     ciphertext: str,
     seed_length: int,
     *,
     extension: str = "plaintext",
     top_n: int = 10,
 ) -> list[dict]:
-    """Enumerate numeric priming keys (10^n); score full decrypt."""
+    """Enumerate numeric priming keys for Gronsfeld autokey (10^n); score full decrypt."""
     if seed_length < 1 or seed_length > 6:
         raise ValueError("seed_length must be 1–6 for numeric brute enumeration")
     ct = ciphertext

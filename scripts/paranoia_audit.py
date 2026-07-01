@@ -116,6 +116,7 @@ def audit_non_periodic_properties(report: ParanoiaReport) -> None:
         "autokey-ciphertext",
         "autokey-ciphertext-beaufort",
         "gronsfeld-autokey-31415",
+        "gronsfeld-autokey-ct-31415",
         "gak-ctak-right-s42",
         "xgak-sum-right-s42",
         "running-key-book",

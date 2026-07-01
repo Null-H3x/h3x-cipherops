@@ -1,12 +1,12 @@
 # Non-Periodic Polyalphabetic Ciphers
 
-Autokey (including ciphertext-autokey, GAK, XGAK) and running key are polyalphabetic but **not periodic**. The standard Vigenère attack pipeline in [`methods.md`](methods.md) must **not** be applied blindly.
+Autokey (including ciphertext-autokey), Gronsfeld autokey, Eyes GAK/XGAK, and running key are polyalphabetic but **not periodic**. The standard Vigenère attack pipeline in [`methods.md`](methods.md) must **not** be applied blindly.
 
 ---
 
 ## Periodic vs non-periodic
 
-| Property | Vigenère / Beaufort / Gronsfeld | Autokey / GAK / XGAK | Running key |
+| Property | Vigenère / Beaufort / Gronsfeld (periodic) | Autokey / Gronsfeld autokey / Eyes GAK·XGAK | Running key |
 |----------|----------------------------------|----------------------|-------------|
 | Keystream repeats | Yes, period \(m\) | No — extends with plaintext or ciphertext | No — external text |
 | Kasiski useful | Yes | Misleading | No |

@@ -10,7 +10,7 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cipherops.analysis.autokey_solver import brute_force_autokey_seed, brute_force_gak_seed
+from cipherops.analysis.autokey_solver import brute_force_autokey_seed, brute_force_gronsfeld_autokey_seed
 from cipherops.analysis.coset_ic import coset_ic_profile
 from cipherops.analysis.fingerprint import (
     ENGLISH_IC,
@@ -116,10 +116,12 @@ def audit_classical_kats(report: AuditReport) -> None:
             ),
         ),
         (
-            "gak brute enumerates 314",
+            "gronsfeld autokey brute enumerates 314",
             any(
                 r["seed"] == "314" and r["plaintext"] == "CAT"
-                for r in brute_force_gak_seed(classical.gronsfeld_autokey("CAT", "314"), 3, top_n=1000)
+                for r in brute_force_gronsfeld_autokey_seed(
+                    classical.gronsfeld_autokey("CAT", "314"), 3, top_n=1000
+                )
             ),
         ),
         ("base64 Hello", encoding.base64_encode("Hello") == "SGVsbG8="),

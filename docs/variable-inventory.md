@@ -341,7 +341,8 @@ Parameters stored on every dataset record and ground-truth row.
 | Nomenclator | `codebook` |
 | Columnar | `key` |
 | Autokey | `autokey-standard`, `autokey-beaufort`, `autokey-ciphertext`, `autokey-ciphertext-beaufort` | `key`, `variant`, `extension` |
-| GAK / XGAK | `gak-31415`, `xgak-31415` | `numeric_key`, `extension` |
+| Gronsfeld autokey | `gronsfeld-autokey-31415`, `gronsfeld-autokey-ct-31415` | `numeric_key`, `extension` |
+| Eyes GAK / XGAK | `gak-ctak-right-s42`, `gak-ptak-right-s42`, `xgak-sum-right-s42`, `xgak-diff-right-s42` | `prng_seed`, `mode` |
 | Beaufort, Porta, Vigenère, Playfair, Bifid, Trifid | `key` |
 | Running key | `key_source` |
 | Gronsfeld | `numeric_key` |
