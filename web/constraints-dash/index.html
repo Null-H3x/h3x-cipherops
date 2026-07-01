@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>H3X // Constraints Dash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">H3X</span>
+      <span class="brand-sep">//</span>
+      <span class="brand-title">Constraints Dash</span>
+    </div>
+    <div class="topbar-meta">
+      <span id="status-pill" class="pill pill-idle">IDLE</span>
+      <span class="meta-item">propagate → validate → loop</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar panel">
+      <h2 class="panel-title">Source</h2>
+
+      <label class="field">
+        <span>Input mode</span>
+        <select id="source-mode">
+          <option value="preset">Preset corpus</option>
+          <option value="fingerprinted">Fingerprinted dataset</option>
+          <option value="noita">Noita eyes (unsolved)</option>
+          <option value="custom">Paste ciphertext</option>
+        </select>
+      </label>
+
+      <div id="panel-preset" class="source-panel">
+        <label class="field">
+          <span>Preset</span>
+          <select id="preset-slug"></select>
+        </label>
+      </div>
+
+      <div id="panel-fingerprinted" class="source-panel hidden">
+        <label class="field">
+          <span>Dataset slug</span>
+          <select id="fp-slug"></select>
+        </label>
+        <label class="field">
+          <span>Record id (optional)</span>
+          <input id="fp-record-id" type="text" placeholder="autokey-standard-01" />
+        </label>
+      </div>
+
+      <div id="panel-custom" class="source-panel hidden">
+        <label class="field">
+          <span>Propagator</span>
+          <select id="propagator">
+            <option value="stream_extension">Stream Extension (autokey)</option>
+            <option value="dynamic_perm">Dynamic Perm (GAK)</option>
+            <option value="shared_keystream">Shared Keystream (decks)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Ciphertext</span>
+          <textarea id="ciphertext" rows="4" placeholder="Alphabetic ciphertext or JSON int deck…"></textarea>
+        </label>
+        <label class="field">
+          <span>Plaintext trial / crib</span>
+          <textarea id="plaintext" rows="3" placeholder="Optional known plaintext for seed verify"></textarea>
+        </label>
+        <div id="stream-fields">
+          <label class="field">
+            <span>Seed / key</span>
+            <input id="seed" type="text" value="KEY" />
+          </label>
+          <label class="field inline">
+            <span>Seed length</span>
+            <input id="seed-length" type="number" value="3" min="1" max="12" />
+          </label>
+          <label class="field">
+            <span>Extension</span>
+            <select id="extension">
+              <option value="plaintext">plaintext</option>
+              <option value="ciphertext">ciphertext</option>
+            </select>
+          </label>
+        </div>
+        <div id="gak-fields" class="hidden">
+          <label class="field">
+            <span>GAK mode</span>
+            <select id="gak-mode">
+              <option value="ctak_right">ctak_right</option>
+              <option value="ctak_left">ctak_left</option>
+              <option value="ptak_right">ptak_right</option>
+              <option value="ptak_left">ptak_left</option>
+              <option value="xgak_sum_right">xgak_sum_right</option>
+              <option value="xgak_diff_right">xgak_diff_right</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>PRNG seed center</span>
+            <input id="prng-seed" type="number" value="42" />
+          </label>
+        </div>
+        <div id="deck-fields" class="hidden">
+          <label class="field inline">
+            <span>Deck size</span>
+            <input id="deck-size" type="number" value="83" />
+          </label>
+        </div>
+      </div>
+
+      <label class="field">
+        <span>Crib pins (JSON)</span>
+        <textarea id="pins-json" rows="2" placeholder='[{"pos":1,"msg":0,"pt":10}]'></textarea>
+      </label>
+
+      <label class="field inline">
+        <span>Max rounds</span>
+        <input id="max-rounds" type="number" value="10" min="1" max="20" />
+      </label>
+
+      <button id="run-btn" class="btn btn-primary">▶ RUN VALIDATED LOOP</button>
+      <button id="load-sample-btn" class="btn btn-ghost">Load autokey sample</button>
+    </aside>
+
+    <main class="main">
+      <section class="panel summary-panel">
+        <h2 class="panel-title">Run summary</h2>
+        <div id="summary-grid" class="summary-grid">
+          <div class="stat"><span class="stat-label">Corpus</span><span id="stat-corpus" class="stat-value">—</span></div>
+          <div class="stat"><span class="stat-label">Propagator</span><span id="stat-prop" class="stat-value">—</span></div>
+          <div class="stat"><span class="stat-label">Findings</span><span id="stat-findings" class="stat-value">—</span></div>
+          <div class="stat"><span class="stat-label">Validated</span><span id="stat-validated" class="stat-value">—</span></div>
+          <div class="stat"><span class="stat-label">Conflicts</span><span id="stat-conflicts" class="stat-value">—</span></div>
+          <div class="stat"><span class="stat-label">Converged</span><span id="stat-converged" class="stat-value">—</span></div>
+        </div>
+        <div id="round-timeline" class="round-timeline"></div>
+      </section>
+
+      <section class="panel findings-panel">
+        <div class="findings-toolbar">
+          <h2 class="panel-title">Findings</h2>
+          <div class="filters">
+            <input id="filter-q" type="search" placeholder="Search…" />
+            <select id="filter-kind">
+              <option value="">All kinds</option>
+            </select>
+            <select id="filter-confidence">
+              <option value="">All confidence</option>
+              <option value="hard">hard</option>
+              <option value="propagated">propagated</option>
+              <option value="heuristic">heuristic</option>
+            </select>
+            <select id="filter-round">
+              <option value="">All rounds</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="findings-table">
+            <thead>
+              <tr>
+                <th>Round</th>
+                <th>Kind</th>
+                <th>Conf.</th>
+                <th>Source</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody id="findings-body">
+              <tr><td colspan="5" class="empty">Select a corpus or paste ciphertext, then run.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="page-prev" class="btn btn-ghost" disabled>← Prev</button>
+          <span id="page-info">0 / 0</span>
+          <button id="page-next" class="btn btn-ghost" disabled>Next →</button>
+        </div>
+      </section>
+
+      <section class="panel detail-panel">
+        <h2 class="panel-title">Finding detail</h2>
+        <pre id="finding-detail" class="terminal">{}</pre>
+      </section>
+    </main>
+  </div>
+
+  <footer class="logbar panel">
+    <div class="log-header">// terminal</div>
+    <pre id="log" class="log"></pre>
+  </footer>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>

@@ -64,6 +64,19 @@ merged = merge_findings(findings, map, gak_findings)
 payload = merged.to_dict()  # JSON-serializable
 ```
 
+## Findings browser (H3X Dash)
+
+In-browser dashboard for running the validated propagation loop on preset corpora, fingerprinted datasets, or pasted ciphertext:
+
+```bash
+PYTHONPATH=. python3 scripts/serve_constraints_dash.py
+# → http://127.0.0.1:8765/
+```
+
+Features: preset corpus picker, fingerprinted autokey/GAK datasets, custom ciphertext paste, crib pins, round timeline, paginated findings table with filters.
+
+Static assets live in `web/constraints-dash/`.
+
 ## Audit
 
 ```bash
