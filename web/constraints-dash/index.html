@@ -18,7 +18,7 @@
     </div>
     <div class="topbar-meta">
       <span id="status-pill" class="pill pill-idle">IDLE</span>
-      <span class="meta-item">identify → route → run</span>
+      <span class="meta-item">identify → route → run → recover</span>
     </div>
   </header>
 
@@ -89,6 +89,56 @@
           <div id="stop-headline" class="stop-headline"></div>
           <p id="stop-detail" class="stop-detail"></p>
           <ul id="stop-suggestions" class="stop-suggestions"></ul>
+        </div>
+      </section>
+
+      <section class="panel recovery-panel">
+        <div class="recovery-grid">
+          <div class="recovery-col">
+            <div class="findings-toolbar">
+              <h2 class="panel-title">Plaintext assembly</h2>
+              <span id="plaintext-coverage" class="classify-status">Run loop to assemble</span>
+            </div>
+            <p class="source-hint">Built from grounded pins and <code>assignment</code> findings (<code>field=pt</code>). Unknown positions shown as ·</p>
+            <div id="plaintext-messages" class="plaintext-messages">
+              <p class="classify-status">No session yet.</p>
+            </div>
+            <div id="plaintext-full-decrypt" class="plaintext-full hidden"></div>
+          </div>
+
+          <div class="recovery-col brute-col">
+            <div class="findings-toolbar">
+              <h2 class="panel-title">Brute force</h2>
+              <span id="brute-status" class="classify-status">Runs when structure alone is insufficient</span>
+            </div>
+            <p class="source-hint">Best after <strong>needs_information</strong> — enumerates keys/seeds, scores candidates, feeds back into route → run.</p>
+            <label class="field inline">
+              <span>Lane</span>
+              <select id="brute-lane">
+                <option value="auto">Auto (from route / IC)</option>
+                <option value="caesar">Caesar / ROT (26 shifts)</option>
+                <option value="autokey_seed">Autokey seed (26^n)</option>
+                <option value="gak_prng">GAK PRNG seed sweep</option>
+              </select>
+            </label>
+            <label class="field inline">
+              <span>Seed length</span>
+              <input id="brute-seed-length" type="number" value="3" min="1" max="4" />
+            </label>
+            <label class="field inline">
+              <span>Top N</span>
+              <input id="brute-top-n" type="number" value="8" min="1" max="50" />
+            </label>
+            <label class="field inline">
+              <span>GAK range</span>
+              <input id="brute-gak-min" type="number" value="0" min="0" />
+              <span class="brute-range-sep">–</span>
+              <input id="brute-gak-max" type="number" value="500" min="0" />
+            </label>
+            <button id="brute-run-btn" class="btn btn-primary">▶ Run brute lane</button>
+            <div id="brute-notes" class="brute-notes"></div>
+            <div id="brute-results" class="brute-results"></div>
+          </div>
         </div>
       </section>
 

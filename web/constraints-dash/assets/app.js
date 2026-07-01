@@ -369,8 +369,182 @@ async function handleRunResponse(data) {
 
   populateFiltersFromRun(data);
   renderSummary(data);
+  if (data.plaintext_view) {
+    renderPlaintextView(data.plaintext_view);
+  } else {
+    await fetchPlaintextView();
+  }
   await fetchFindings();
+  updateBruteHint(data.summary?.stop);
   if (!data.summary?.stop) setStatus("ok", "READY");
+}
+
+function renderPlaintextView(view) {
+  state.plaintextView = view;
+  const cov = $("plaintext-coverage");
+  const box = $("plaintext-messages");
+  const fullEl = $("plaintext-full-decrypt");
+
+  if (!view || !view.messages?.length) {
+    cov.textContent = "No assignments yet";
+    box.innerHTML = '<p class="classify-status">Ground pt pins or run shared-keystream cribs to fill positions.</p>';
+    fullEl.classList.add("hidden");
+    return;
+  }
+
+  const c = view.coverage || {};
+  cov.textContent = `${c.known ?? 0} / ${c.total ?? 0} positions (${Math.round((c.ratio ?? 0) * 100)}%)`;
+
+  box.innerHTML = "";
+  view.messages.forEach((msg) => {
+    const block = document.createElement("div");
+    block.className = "pt-msg-block";
+    block.innerHTML = `
+      <div class="pt-msg-head">
+        <span class="pt-msg-label">${msg.label}</span>
+        <span class="pt-msg-meta">${msg.known}/${msg.length} known</span>
+      </div>
+      <pre class="pt-msg-text">${msg.text || "—"}</pre>
+    `;
+    box.appendChild(block);
+  });
+
+  if (view.full_decrypt?.text) {
+    fullEl.classList.remove("hidden");
+    fullEl.innerHTML = `
+      <div class="pt-msg-head">
+        <span class="pt-msg-label">Full decrypt (verified seed: ${view.full_decrypt.seed})</span>
+      </div>
+      <pre class="pt-msg-text pt-full">${view.full_decrypt.text}</pre>
+    `;
+  } else {
+    fullEl.classList.add("hidden");
+    fullEl.innerHTML = "";
+  }
+}
+
+async function fetchPlaintextView() {
+  if (!state.session) return;
+  const res = await fetch(`/api/plaintext-view?session=${encodeURIComponent(state.session)}`);
+  const data = await res.json();
+  if (res.ok) renderPlaintextView(data.plaintext_view);
+}
+
+function updateBruteHint(stop) {
+  const el = $("brute-status");
+  if (!stop) {
+    el.textContent = "Optional — try after route → run";
+    return;
+  }
+  if (stop.status === "needs_information") {
+    el.textContent = "Recommended — loop needs more key / plaintext information";
+    el.classList.add("brute-warn");
+  } else if (stop.status === "complete") {
+    el.textContent = "Optional — verify or explore alternate keys";
+    el.classList.remove("brute-warn");
+  } else {
+    el.textContent = "Resolve stop status first, then brute if needed";
+    el.classList.remove("brute-warn");
+  }
+}
+
+async function runBruteForce() {
+  const ct = getCiphertext();
+  if (!ct) {
+    log("Brute: paste alphabetic ciphertext first");
+    return;
+  }
+  $("brute-status").textContent = "Running…";
+  setStatus("run", "BRUTING");
+  try {
+    const res = await fetch("/api/brute-force", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session: state.session,
+        classification: state.classification,
+        ciphertext: ct,
+        lane: $("brute-lane").value,
+        seed_length: Number($("brute-seed-length").value) || 3,
+        top_n: Number($("brute-top-n").value) || 8,
+        gak_seed_min: Number($("brute-gak-min").value) || 0,
+        gak_seed_max: Number($("brute-gak-max").value) || 500,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Brute failed");
+    state.lastBrute = data;
+    renderBruteResults(data);
+    log(`Brute [${data.lane}]: ${data.count} candidate(s)`);
+    $("brute-status").textContent = `${data.lane} · ${data.count} hit(s)`;
+    setStatus("idle", "BRUTE OK");
+  } catch (err) {
+    log(`Brute error: ${err.message}`);
+    $("brute-status").textContent = "Error";
+    setStatus("err", "ERROR");
+  }
+}
+
+function renderBruteResults(data) {
+  const notes = $("brute-notes");
+  const box = $("brute-results");
+  notes.textContent = data.notes || "";
+  box.innerHTML = "";
+  if (!data.candidates?.length) {
+    box.innerHTML = '<p class="classify-status">No survivors — widen range or add plaintext trial.</p>';
+    return;
+  }
+  data.candidates.forEach((c, idx) => {
+    const card = document.createElement("div");
+    card.className = "brute-card";
+    const preview = c.plaintext_preview || c.plaintext || "";
+    card.innerHTML = `
+      <div class="brute-card-head">
+        <span class="brute-label">${c.label}</span>
+        <span class="brute-score">${c.score != null ? `score ${c.score}` : c.detail || ""}</span>
+      </div>
+      ${preview ? `<pre class="brute-preview">${preview}</pre>` : ""}
+      <button type="button" class="btn btn-ghost brute-apply" data-idx="${idx}">Apply → re-run loop</button>
+    `;
+    card.querySelector(".brute-apply").addEventListener("click", () => applyBruteCandidate(idx));
+    box.appendChild(card);
+  });
+}
+
+async function applyBruteCandidate(index) {
+  const c = state.lastBrute?.candidates?.[index];
+  if (!c) return;
+  if (state.routedIndex == null) {
+    log("Apply brute: route a hypothesis first");
+    return;
+  }
+  log(`Apply brute candidate: ${c.label}`);
+  setStatus("run", "RUNNING");
+  let pins = [];
+  try { pins = parsePins(); } catch { pins = []; }
+  const body = {
+    session: state.session,
+    classification: state.classification,
+    hypothesis_index: state.routedIndex,
+    ciphertext: getCiphertext(),
+    pins,
+    max_rounds: Number($("max-rounds").value) || 10,
+  };
+  if (c.hypothesis_patch) body.hypothesis_override = c.hypothesis_patch;
+  if (c.plaintext) body.plaintext_trial = c.plaintext;
+  try {
+    const res = await fetch("/api/route-run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Re-run failed");
+    await handleRunResponse(data);
+  } catch (err) {
+    log(`ERROR: ${err.message}`);
+    setStatus("err", "ERROR");
+  }
 }
 
 function canRouteRun(h) {
@@ -568,6 +742,8 @@ function bindEvents() {
     state.offset += state.limit;
     fetchFindings().catch((e) => log(e.message));
   });
+
+  $("brute-run-btn").addEventListener("click", runBruteForce);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
