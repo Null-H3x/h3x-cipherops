@@ -16,7 +16,8 @@ cipherops/ciphers/registry   Implementation + params per variant
 datasets/fingerprinted/      Plaintext/ciphertext pairs (solved)
 datasets/unsolved/           Ciphertext-only corpora
         ↓
-datasets/ciphertext-properties/   Fingerprint, frequency, Kasiski, attacks
+datasets/ciphertext-properties/   Fingerprint, frequency, Kasiski, coset IC, attacks
+docs/cryptanalysis/               Grounded cryptanalysis reference (methods, keyspace, isomorphs)
         ↓
 Pre-LLM-Ingestion/processed/      Audited ground-truth registry
 ```
@@ -221,6 +222,18 @@ Each row mirrors a fingerprinted or unsolved record by `id` and adds cryptanalyt
 | `candidate_key_lengths` | Likely key periods |
 | `strongest_period` | Highest-confidence period |
 
+### `coset_ic` — column-wise IC for period confirmation
+
+Present when `stream.symbol_class == "alpha"`. Computes mean index of coincidence across cosets at each candidate period (2–20). See [`docs/cryptanalysis/methods.md`](cryptanalysis/methods.md).
+
+| Field | Description |
+|-------|-------------|
+| `periods_tested` | Number of periods evaluated |
+| `best_period` | Period with highest mean coset IC |
+| `best_mean_ic` | Mean IC at `best_period` |
+| `english_ic_reference` | English baseline (~0.067) |
+| `by_period` | `{period: mean_ic}` map (string keys) |
+
 ### `ngrams` — n-gram structure
 
 | Field | Description |
@@ -261,7 +274,7 @@ These slots reserve structure for future crib-drag, brute-force, dictionary, hil
 | Field | Description |
 |-------|-------------|
 | `properties_sha256` | Hash of all computed properties (excludes id/source/validation) |
-| `analyzer_version` | Schema version (currently `1.0.0`) |
+| `analyzer_version` | Schema version (currently `1.1.0`) |
 
 ---
 
@@ -380,7 +393,7 @@ Parameters stored on every dataset record and ground-truth row.
 | Cipher registry | 47 variants | family, slug, params, era, encrypt_only |
 | Fingerprinted datasets | 470 | plaintext, ciphertext, validation hashes |
 | Unsolved datasets | 9 | integer ciphertext, header anomaly, σ₀ targets |
-| Ciphertext properties | 479 | fingerprint, frequency, kasiski, ngrams, patterns, attacks |
+| Ciphertext properties | 479 | fingerprint, frequency, kasiski, coset_ic, ngrams, patterns, attacks |
 | Ground truth | 48 | cross-links math ↔ data ↔ properties |
 
 ---

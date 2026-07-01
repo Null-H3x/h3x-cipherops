@@ -21,6 +21,7 @@ datasets/ciphertext-properties/
 | `fingerprint` | Shannon entropy, IC, normalized IC ratio, chi-squared vs English, Friedman estimate | Classical fingerprinting |
 | `frequency` | `unigram`, `top_unigrams` | Symbol frequency profile |
 | `kasiski` | repeat spacings, GCD, candidate key lengths | Periodicity / Kasiski examination |
+| `coset_ic` | mean IC per period, best period | Column-wise IC for Vigenère period confirmation |
 | `ngrams` | top bigrams/trigrams | N-gram structure |
 | `patterns` | spaces, punctuation, word estimates, repeated blocks | Word/structural patterns |
 | `attacks` | six vectors (see below) | Attack viability metadata with confidence and recommended methods |
@@ -52,4 +53,4 @@ PYTHONPATH=. python3 scripts/generate_ciphertext_properties.py
 PYTHONPATH=. python3 scripts/validate_ciphertext_properties.py
 ```
 
-Implementation: `cipherops/analysis/`. Schema version: `analyzer_version` in each record (currently `1.0.0`).
+Implementation: `cipherops/analysis/`. Reference docs: [`docs/cryptanalysis/`](../../docs/cryptanalysis/). Schema version: `analyzer_version` in each record (currently `1.1.0`).

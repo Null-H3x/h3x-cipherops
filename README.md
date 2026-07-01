@@ -108,11 +108,11 @@ LLM-Cryptography/
 | Corpus | Path | Records | Status |
 |--------|------|---------|--------|
 | Fingerprinted ciphers | `datasets/fingerprinted/*/data.jsonl` | 470 (47 × 10) | solved, roundtrip-verified |
-| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 479 | fingerprint, frequency, Kasiski, n-grams, attack surface |
+| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 479 | fingerprint, frequency, Kasiski, coset IC, n-grams, attack surface |
 | Noita eye messages | `datasets/unsolved/noita-eye-messages/data.jsonl` | 9 | unsolved (from [Eyes](https://github.com/Null-H3x/Eyes)) |
 | Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 48 | audited |
 
-Math docs for every cipher: `docs/math-formulas/`. Full variable inventory: [`docs/variable-inventory.md`](docs/variable-inventory.md). Ground truth links ciphers → math → datasets → property profiles.
+Math docs for every cipher: `docs/math-formulas/`. Cryptanalysis reference (methods, keyspace, isomorphs): [`docs/cryptanalysis/`](docs/cryptanalysis/). Full variable inventory: [`docs/variable-inventory.md`](docs/variable-inventory.md). Ground truth links ciphers → math → datasets → property profiles.
 
 Analyze a ciphertext from the CLI:
 

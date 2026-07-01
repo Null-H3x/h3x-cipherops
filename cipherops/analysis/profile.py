@@ -7,6 +7,7 @@ import json
 from typing import Any
 
 from cipherops.analysis.attacks import ATTACK_VECTORS, attack_surface
+from cipherops.analysis.coset_ic import coset_ic_profile
 from cipherops.analysis.fingerprint import fingerprint_metrics
 from cipherops.analysis.frequency import frequency_profile
 from cipherops.analysis.kasiski import kasiski_examination
@@ -14,7 +15,7 @@ from cipherops.analysis.ngrams import ngram_profile
 from cipherops.analysis.patterns import word_pattern_profile
 from cipherops.analysis.stream import normalize_stream
 
-ANALYZER_VERSION = "1.0.0"
+ANALYZER_VERSION = "1.1.0"
 
 
 def analyze_ciphertext(
@@ -31,6 +32,7 @@ def analyze_ciphertext(
     fingerprint["symbol_class"] = stream.symbol_class
 
     kasiski = kasiski_examination(stream.text)
+    coset_ic = coset_ic_profile(stream.text) if stream.symbol_class == "alpha" else None
     patterns = word_pattern_profile(stream.raw, stream.text, symbol_class=stream.symbol_class)
     attacks = attack_surface(
         cipher_family=cipher_family,
@@ -52,6 +54,7 @@ def analyze_ciphertext(
         "fingerprint": fingerprint,
         "frequency": frequency_profile(stream.text),
         "kasiski": kasiski,
+        "coset_ic": coset_ic,
         "ngrams": ngram_profile(stream.text),
         "patterns": patterns,
         "attacks": {name: attacks[name] for name in ATTACK_VECTORS},

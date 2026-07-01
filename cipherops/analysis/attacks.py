@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from cipherops.analysis.keyspace import estimate_keyspace
+
 ATTACK_VECTORS = (
     "crib_dragging",
     "brute_force",
@@ -309,6 +311,13 @@ FAMILY_GROUPS = {
 }
 
 
+def _apply_keyspace(attacks: dict[str, dict], cipher_family: str, params: dict | None) -> dict[str, dict]:
+    ks = estimate_keyspace(cipher_family, params=params or {})
+    if "brute_force" in attacks and ks.get("label"):
+        attacks["brute_force"]["key_space_estimate"] = ks["label"]
+    return attacks
+
+
 def attack_surface(
     *,
     cipher_family: str,
@@ -320,24 +329,24 @@ def attack_surface(
     params: dict | None = None,
 ) -> dict[str, dict]:
     if status == "unsolved" or cipher_family == "noita-eye":
-        return _unsolved_attacks(fingerprint, kasiski)
+        return _apply_keyspace(_unsolved_attacks(fingerprint, kasiski), cipher_family, params)
 
     if era == "modern":
         if cipher_family in {"sha256", "sha512", "sha3_256", "blake2b", "hmac"}:
-            return _hash_attacks()
+            return _apply_keyspace(_hash_attacks(), cipher_family, params)
         if cipher_family in {"rsa", "ed25519", "x25519"}:
-            return _asymmetric_attacks(cipher_family)
-        return _modern_attacks(cipher_family, fingerprint.get("symbol_class", "printable"))
+            return _apply_keyspace(_asymmetric_attacks(cipher_family), cipher_family, params)
+        return _apply_keyspace(_modern_attacks(cipher_family, fingerprint.get("symbol_class", "printable")), cipher_family, params)
 
     if cipher_family in FAMILY_GROUPS["encoding"]:
-        return _encoding_attacks()
+        return _apply_keyspace(_encoding_attacks(), cipher_family, params)
     if cipher_family in FAMILY_GROUPS["transposition"]:
-        return _transposition_attacks(patterns)
+        return _apply_keyspace(_transposition_attacks(patterns), cipher_family, params)
     if cipher_family in FAMILY_GROUPS["polyalphabetic"]:
-        return _polyalphabetic_attacks(fingerprint, kasiski, patterns)
+        return _apply_keyspace(_polyalphabetic_attacks(fingerprint, kasiski, patterns), cipher_family, params)
     if cipher_family in FAMILY_GROUPS["polygraphic"] or cipher_family in FAMILY_GROUPS["fractionated"]:
-        return _polyalphabetic_attacks(fingerprint, kasiski, patterns)
+        return _apply_keyspace(_polyalphabetic_attacks(fingerprint, kasiski, patterns), cipher_family, params)
     if cipher_family in FAMILY_GROUPS["monoalphabetic"]:
-        return _monoalphabetic_attacks(fingerprint, patterns)
+        return _apply_keyspace(_monoalphabetic_attacks(fingerprint, patterns), cipher_family, params)
 
-    return _polyalphabetic_attacks(fingerprint, kasiski, patterns)
+    return _apply_keyspace(_polyalphabetic_attacks(fingerprint, kasiski, patterns), cipher_family, params)

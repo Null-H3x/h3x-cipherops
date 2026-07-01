@@ -10,12 +10,14 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from cipherops.analysis.coset_ic import coset_ic_profile
 from cipherops.analysis.fingerprint import (
     ENGLISH_IC,
     index_of_coincidence,
     shannon_entropy,
 )
 from cipherops.analysis.kasiski import kasiski_examination
+from cipherops.analysis.keyspace import estimate_keyspace
 from cipherops.ciphers import classical, encoding
 from cipherops.ciphers.registry import CIPHER_REGISTRY, PLAIN_SAMPLES, get_cipher
 from cipherops.ciphers.utils import mod_inverse
@@ -223,6 +225,41 @@ def audit_analysis_kats(report: AuditReport) -> None:
         report.warn("Kasiski: no period detected on synthetic repeat (may be OK)")
     else:
         report.ok(f"Kasiski: detected periods on synthetic repeat: {kas['candidate_key_lengths'][:3]}")
+
+    short = coset_ic_profile("ABCDE")
+    if short.get("periods_tested") != 0 or short.get("best_period") is not None:
+        report.fail("Coset IC KAT: short text should return empty profile")
+    else:
+        report.ok("Coset IC: short text returns empty profile")
+
+    pt = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG " * 15
+    alpha = "".join(ch for ch in pt if ch.isalpha())
+    vigenere_ct = classical.vigenere(alpha, "KEY")
+    coset = coset_ic_profile(vigenere_ct)
+    ic_at_key = float(coset["by_period"].get("3", 0))
+    ic_off_by_one = float(coset["by_period"].get("2", 0))
+    if ic_at_key <= ic_off_by_one:
+        report.fail(
+            f"Coset IC KAT: period-3 mean IC ({ic_at_key:.4f}) should exceed period-2 ({ic_off_by_one:.4f})"
+        )
+    else:
+        report.ok(f"Coset IC: key-length coset IC ({ic_at_key:.4f}) > adjacent period ({ic_off_by_one:.4f})")
+
+    ks_checks = [
+        ("caesar", 25, "25"),
+        ("affine", 312, "312"),
+        ("atbash", 1, "1"),
+        ("vigenere", None, "26^3"),
+    ]
+    for family, exact, label in ks_checks:
+        params = {"key": "KEY"} if family == "vigenere" else {}
+        ks = estimate_keyspace(family, params=params)
+        if ks.get("label") != label:
+            report.fail(f"Keyspace KAT {family}: expected label {label!r}, got {ks.get('label')!r}")
+        elif exact is not None and ks.get("exact") != exact:
+            report.fail(f"Keyspace KAT {family}: expected exact {exact}, got {ks.get('exact')}")
+        else:
+            report.ok(f"Keyspace: {family} → {ks['label']}")
 
 
 def audit_unsolved_corpus(report: AuditReport) -> None:
