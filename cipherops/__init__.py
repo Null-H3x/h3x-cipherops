@@ -1,5 +1,5 @@
 """
-cipherops — The crypto analysis toolkit for LLM Cryptography.
+cipherops — Validated cipher engine for H3X CipherOps.
 
 Features:
 - Fingerprinting: entropy, IC, Kasiski exam

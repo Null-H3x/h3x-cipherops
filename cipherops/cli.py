@@ -11,7 +11,7 @@ from cipherops.analysis.profile import analyze_ciphertext
 
 @click.group()
 def cli():
-    """CipherOps: Crypto analysis toolkit for LLM Cryptography."""
+    """CipherOps: Crypto analysis toolkit for H3X CipherOps."""
     pass
 
 

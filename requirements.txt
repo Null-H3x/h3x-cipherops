@@ -1,4 +1,4 @@
-# LLM Cryptography — Core Dependencies
+# H3X CipherOps — optional ML / fine-tuning dependencies
 
 # Fine-tuning & model inference
 transformers>=4.40.0

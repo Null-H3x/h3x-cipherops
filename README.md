@@ -1,4 +1,4 @@
-# LLM Cryptography
+# H3X CipherOps
 
 An **HTML-based cryptographic puzzle solver** backed by a validated cipher engine (`cipherops/`). Paste or select ciphertext in the browser, identify the likely family, run constraint propagation and attacks, and iterate until the math grounds out or hits a wall with actionable next steps.
 
@@ -26,8 +26,8 @@ The primary stress test is **[Noita Eyes](https://github.com/Null-H3x/Eyes)** �
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/Null-H3x/LLM-Cryptography.git
-cd LLM-Cryptography
+git clone https://github.com/Null-H3x/h3x-cipherops.git
+cd h3x-cipherops
 
 pip install -r requirements-validate.txt
 ```
@@ -113,7 +113,7 @@ Noita model: [`docs/math-formulas/noita-eye.md`](docs/math-formulas/noita-eye.md
 ## Project structure
 
 ```
-LLM-Cryptography/
+h3x-cipherops/
 ├── web/constraints-dash/       # HTML/CSS/JS puzzle solver UI
 ├── cipherops/
 │   ├── ciphers/                # Classical & modern cipher implementations

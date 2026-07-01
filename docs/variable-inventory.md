@@ -1,6 +1,6 @@
 # Variable Inventory
 
-Complete reference of symbols, fields, and parameters tracked across LLM-Cryptography — from mathematical notation through datasets, property profiles, and ground truth.
+Complete reference of symbols, fields, and parameters tracked across H3X CipherOps — from mathematical notation through datasets, property profiles, and ground truth.
 
 **Scope:** 57 solved cipher variants (570 fingerprinted records) + 1 unsolved corpus (9 Noita eye messages) + 579 ciphertext property profiles.
 

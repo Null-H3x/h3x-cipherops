@@ -31,5 +31,13 @@ jobs:
       - name: Math and implementation audit
         run: PYTHONPATH=. python3 scripts/math_audit.py
 
+      - name: Constraint propagator audit
+        run: PYTHONPATH=. python3 scripts/constraint_audit.py
+
+      - name: Generate and validate constraint findings
+        run: |
+          PYTHONPATH=. python3 scripts/generate_constraint_findings.py
+          PYTHONPATH=. python3 scripts/validate_constraint_findings.py
+
       - name: Paranoia audit (paths, invariants, full suite)
         run: PYTHONPATH=. python3 scripts/paranoia_audit.py
