@@ -40,6 +40,28 @@ Mathematical definitions, variables, and validated Python implementations for cl
 | Base64 | `base64.md` | `b64` |
 | Fractionated Morse | `fractionated-morse.md` | `fractionated-morse` |
 
+## Modern Key Ciphers
+
+| Cipher | File | Dataset Slug(s) |
+|--------|------|-------------------|
+| AES-GCM | `aes-gcm.md` | `aes-128-gcm`, `aes-256-gcm` |
+| AES-CBC | `aes-cbc.md` | `aes-128-cbc`, `aes-256-cbc` |
+| AES-CTR | `aes-ctr.md` | `aes-128-ctr` |
+| ChaCha20-Poly1305 | `chacha20-poly1305.md` | `chacha20-poly1305` |
+| Triple DES | `tripledes.md` | `tripledes-cbc` |
+| Fernet | `fernet.md` | `fernet` |
+| XOR-SHA256 Stream | `xor-stream.md` | `xor-sha256-stream` |
+| PBKDF2 | `pbkdf2.md` | `pbkdf2-aes-gcm` |
+| HKDF | `hkdf.md` | `hkdf-aes-gcm` |
+| RSA-OAEP Hybrid | `rsa.md` | `rsa-oaep-hybrid` |
+| Ed25519 | `ed25519.md` | `ed25519-sign` |
+| X25519 ECDH | `x25519.md` | `x25519-ecdh` |
+| SHA-256 | `sha256.md` | `sha256` |
+| SHA-512 | `sha512.md` | `sha512` |
+| SHA3-256 | `sha3-256.md` | `sha3-256` |
+| BLAKE2b | `blake2b.md` | `blake2b` |
+| HMAC-SHA256 | `hmac-sha256.md` | `hmac-sha256` |
+
 ## Implementation Source
 
 All formulas map to validated code in `cipherops/ciphers/` and reproducible datasets under `datasets/fingerprinted/`.

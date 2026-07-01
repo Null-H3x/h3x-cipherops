@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from cipherops.ciphers import classical, encoding, fractionated, polygraphic, transposition
+from cipherops.ciphers import classical, encoding, fractionated, modern, polygraphic, transposition
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,8 @@ class CipherSpec:
     math_ref: str
     difficulty: int
     variants: tuple[str, ...] = ()
+    encrypt_only: bool = False
+    era: str = "classical"
 
 
 PLAIN_SAMPLES = [
@@ -120,7 +122,29 @@ def _registry() -> list[CipherSpec]:
         CipherSpec("straddle_checkerboard", "straddle-default", fractionated.straddle_checkerboard, fractionated.straddle_checkerboard_decrypt, {"layout": "default"}, "docs/math-formulas/straddle-checkerboard.md", 5),
         CipherSpec("trifid", "trifid-keyword", lambda t: fractionated.trifid(t, "KEYWORD"), lambda t: fractionated.trifid_decrypt(t, "KEYWORD"), {"key": "KEYWORD"}, "docs/math-formulas/trifid.md", 5),
         CipherSpec("base64", "b64", encoding.base64_encode, encoding.base64_decode, {}, "docs/math-formulas/base64.md", 1),
-        CipherSpec("fractionated_morse", "fractionated-morse", lambda t: fractionated.fractionated_morse(t, "CIPHER"), lambda t: fractionated.fractionated_morse_decrypt(t, "CIPHER"), {"substitution_key": "CIPHER"}, "docs/math-formulas/fractionated-morse.md", 5),
+        CipherSpec("fractionated_morse", "fractionated-morse", lambda t: fractionated.fractionated_morse(t, "CIPHER"), lambda t: fractionated.fractionated_morse_decrypt(t, "CIPHER"), {"substitution_key": "CIPHER"}, "docs/math-formulas/fractionated-morse.md", 5, encrypt_only=True),
+        # Modern symmetric / AEAD
+        CipherSpec("aes_gcm", "aes-128-gcm", modern.aes_128_gcm_encrypt, modern.aes_128_gcm_decrypt, {"key_bits": 128, "mode": "GCM"}, "docs/math-formulas/aes-gcm.md", 6, era="modern"),
+        CipherSpec("aes_gcm", "aes-256-gcm", modern.aes_256_gcm_encrypt, modern.aes_256_gcm_decrypt, {"key_bits": 256, "mode": "GCM"}, "docs/math-formulas/aes-gcm.md", 6, era="modern"),
+        CipherSpec("aes_cbc", "aes-128-cbc", modern.aes_128_cbc_encrypt, modern.aes_128_cbc_decrypt, {"key_bits": 128, "mode": "CBC"}, "docs/math-formulas/aes-cbc.md", 6, era="modern"),
+        CipherSpec("aes_cbc", "aes-256-cbc", modern.aes_256_cbc_encrypt, modern.aes_256_cbc_decrypt, {"key_bits": 256, "mode": "CBC"}, "docs/math-formulas/aes-cbc.md", 6, era="modern"),
+        CipherSpec("aes_ctr", "aes-128-ctr", modern.aes_128_ctr_encrypt, modern.aes_128_ctr_decrypt, {"key_bits": 128, "mode": "CTR"}, "docs/math-formulas/aes-ctr.md", 6, era="modern"),
+        CipherSpec("chacha20_poly1305", "chacha20-poly1305", modern.chacha20_poly1305_encrypt, modern.chacha20_poly1305_decrypt, {"key_bits": 256}, "docs/math-formulas/chacha20-poly1305.md", 6, era="modern"),
+        CipherSpec("triple_des", "tripledes-cbc", modern.triple_des_cbc_encrypt, modern.triple_des_cbc_decrypt, {"key_bits": 168, "mode": "CBC"}, "docs/math-formulas/tripledes.md", 5, era="modern"),
+        CipherSpec("fernet", "fernet", modern.fernet_encrypt, modern.fernet_decrypt, {"construction": "AES-128-CBC+HMAC"}, "docs/math-formulas/fernet.md", 6, era="modern"),
+        CipherSpec("xor_stream", "xor-sha256-stream", modern.xor_sha256_stream_encrypt, modern.xor_sha256_stream_decrypt, {"keystream": "SHA256 counter mode"}, "docs/math-formulas/xor-stream.md", 4, era="modern"),
+        CipherSpec("pbkdf2", "pbkdf2-aes-gcm", modern.pbkdf2_aes_gcm_encrypt, modern.pbkdf2_aes_gcm_decrypt, {"kdf": "PBKDF2-HMAC-SHA256", "iterations": 100000}, "docs/math-formulas/pbkdf2.md", 6, era="modern"),
+        CipherSpec("hkdf", "hkdf-aes-gcm", modern.hkdf_aes_gcm_encrypt, modern.hkdf_aes_gcm_decrypt, {"kdf": "HKDF-SHA256"}, "docs/math-formulas/hkdf.md", 6, era="modern"),
+        # Modern asymmetric
+        CipherSpec("rsa", "rsa-oaep-hybrid", modern.rsa_oaep_hybrid_encrypt, modern.rsa_oaep_hybrid_decrypt, {"padding": "OAEP-SHA256", "hybrid": "AES-256-GCM"}, "docs/math-formulas/rsa.md", 7, era="modern"),
+        CipherSpec("ed25519", "ed25519-sign", modern.ed25519_sign_encrypt, modern.ed25519_sign_decrypt, {"curve": "Ed25519"}, "docs/math-formulas/ed25519.md", 7, era="modern"),
+        CipherSpec("x25519", "x25519-ecdh", modern.x25519_shared_secret_encrypt, modern.x25519_shared_secret_decrypt, {"curve": "Curve25519"}, "docs/math-formulas/x25519.md", 7, era="modern"),
+        # Modern hash / MAC (one-way)
+        CipherSpec("sha256", "sha256", modern.sha256_digest, modern.sha256_decrypt, {"output_bits": 256}, "docs/math-formulas/sha256.md", 3, encrypt_only=True, era="modern"),
+        CipherSpec("sha512", "sha512", modern.sha512_digest, modern.sha512_decrypt, {"output_bits": 512}, "docs/math-formulas/sha512.md", 3, encrypt_only=True, era="modern"),
+        CipherSpec("sha3_256", "sha3-256", modern.sha3_256_digest, modern.sha3_256_decrypt, {"output_bits": 256}, "docs/math-formulas/sha3-256.md", 3, encrypt_only=True, era="modern"),
+        CipherSpec("blake2b", "blake2b", modern.blake2b_digest, modern.blake2b_decrypt, {"output_bits": 512}, "docs/math-formulas/blake2b.md", 3, encrypt_only=True, era="modern"),
+        CipherSpec("hmac", "hmac-sha256", modern.hmac_sha256_digest, modern.hmac_sha256_decrypt, {"hash": "SHA256"}, "docs/math-formulas/hmac-sha256.md", 4, encrypt_only=True, era="modern"),
     ]
 
 

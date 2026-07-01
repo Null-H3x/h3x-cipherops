@@ -39,10 +39,11 @@ def generate_dataset(spec, output_root: Path) -> dict:
     records = []
     for idx, plaintext in enumerate(PLAIN_SAMPLES, start=1):
         ciphertext = spec.encrypt(plaintext)
-        decrypted = spec.decrypt(ciphertext)
-        encrypt_only = spec.family == "fractionated_morse"
-        if not encrypt_only and not _roundtrip_ok(plaintext, decrypted, spec.family):
-            raise ValueError(f"Roundtrip failed for {spec.slug} sample {idx}: {decrypted!r} != {plaintext!r}")
+        encrypt_only = spec.encrypt_only
+        if not encrypt_only:
+            decrypted = spec.decrypt(ciphertext)
+            if not _roundtrip_ok(plaintext, decrypted, spec.family):
+                raise ValueError(f"Roundtrip failed for {spec.slug} sample {idx}: {decrypted!r} != {plaintext!r}")
 
         record = {
             "id": f"{spec.slug}-{idx:02d}",
@@ -51,10 +52,11 @@ def generate_dataset(spec, output_root: Path) -> dict:
             "cipher_family": spec.family,
             "params": spec.params,
             "math_ref": spec.math_ref,
+            "era": spec.era,
             "validation": {
                 "plaintext_sha256": sha256_text(plaintext),
-                "roundtrip_verified": spec.family != "fractionated_morse",
-                "encrypt_only": spec.family == "fractionated_morse",
+                "roundtrip_verified": not encrypt_only,
+                "encrypt_only": encrypt_only,
             },
             "difficulty": spec.difficulty,
         }

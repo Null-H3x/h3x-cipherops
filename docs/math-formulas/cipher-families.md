@@ -104,13 +104,41 @@
 
 ## Modern Ciphers (20th Century+)
 
-### Symmetric Key
+### Symmetric Block & Stream
+| Cipher | Type | Math Formula | Dataset Slug |
+|--------|------|--------------|--------------|
+| **AES-GCM** | AEAD block | CTR + GHASH authentication | `aes-128-gcm`, `aes-256-gcm` |
+| **AES-CBC** | Block mode | $C_i = E_K(P_i \oplus C_{i-1})$ | `aes-128-cbc`, `aes-256-cbc` |
+| **AES-CTR** | Stream from block | $C = P \oplus E_K(\text{nonce}\|\text{counter})$ | `aes-128-ctr` |
+| **ChaCha20-Poly1305** | AEAD stream | ChaCha20 + Poly1305 MAC | `chacha20-poly1305` |
+| **3DES-CBC** | Legacy block | Triple-DES EDE chain | `tripledes-cbc` |
+| **Fernet** | Authenticated token | AES-CBC + HMAC-SHA256 | `fernet` |
+| **XOR-SHA256 stream** | Stream | SHA256 counter keystream | `xor-sha256-stream` |
+
+### Key Derivation
+| Cipher | Type | Math Formula | Dataset Slug |
+|--------|------|--------------|--------------|
+| **PBKDF2** | KDF + AES-GCM | Password-based stretching | `pbkdf2-aes-gcm` |
+| **HKDF** | KDF + AES-GCM | Extract-and-expand (RFC 5869) | `hkdf-aes-gcm` |
+
+### Asymmetric
+| Cipher | Type | Math Formula | Dataset Slug |
+|--------|------|--------------|--------------|
+| **RSA-OAEP hybrid** | Public-key + symmetric | RSA-OAEP wraps AES key | `rsa-oaep-hybrid` |
+| **Ed25519** | Signatures | Edwards-curve Schnorr | `ed25519-sign` |
+| **X25519** | ECDH | Curve25519 scalar multiply | `x25519-ecdh` |
+
+### Hash & MAC (one-way)
+| Cipher | Type | Math Formula | Dataset Slug |
+|--------|------|--------------|--------------|
+| **SHA-256** | Hash | Merkle-Damgård 256-bit | `sha256` |
+| **SHA-512** | Hash | Merkle-Damgård 512-bit | `sha512` |
+| **SHA3-256** | Hash | Keccak sponge | `sha3-256` |
+| **BLAKE2b** | Hash | ARX hash 512-bit | `blake2b` |
+| **HMAC-SHA256** | MAC | Keyed hash | `hmac-sha256` |
+
+### Previously documented
 - **AES**: Block, 128 bits, 128/192/256 key
 - **ChaCha20**: Stream, 256 bits
-
-### Asymmetric Key
 - **RSA**: Integer factorization
 - **ECC**: Elliptic curves
-
-### Hash Functions
-- **SHA-256**: 256 bit output
