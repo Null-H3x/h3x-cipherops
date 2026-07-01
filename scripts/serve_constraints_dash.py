@@ -18,6 +18,7 @@ WEB_ROOT = ROOT / "web" / "constraints-dash"
 sys.path.insert(0, str(ROOT))
 
 from cipherops.constraints.adhoc import build_custom_config, list_dashboard_sources
+from cipherops.constraints.crib_hints import ACTIONABLE_KINDS, crib_pins_from_finding, merge_crib_pins
 from cipherops.constraints.pipeline import finding_fingerprint, run_findings_loop
 
 # In-memory cache of last analysis per client session (uuid).
@@ -93,6 +94,7 @@ def _run_analysis(payload: dict[str, Any]) -> dict[str, Any]:
             "slug": config.slug,
             "propagator": config.propagator,
             "description": config.description,
+            "deck_size": config.state.domain.size,
         },
         "summary": result.to_dict(),
         "validated": result.final_validated,
@@ -173,7 +175,27 @@ class DashHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path != "/api/analyze":
+        path = parsed.path
+
+        if path == "/api/crib-from-finding":
+            try:
+                payload = _read_json_body(self)
+                finding = payload.get("finding")
+                if not finding:
+                    _json_response(self, 400, {"error": "finding required"})
+                    return
+                deck_size = int(payload.get("deck_size", 83))
+                anchor_pt = int(payload.get("anchor_pt", 10))
+                existing = payload.get("existing_pins") or []
+                hint = crib_pins_from_finding(finding, deck_size=deck_size, anchor_pt=anchor_pt)
+                if hint.get("pins"):
+                    hint["merged_pins"] = merge_crib_pins(existing, hint["pins"])
+                _json_response(self, 200, hint)
+            except Exception as exc:  # noqa: BLE001
+                _json_response(self, 400, {"error": str(exc)})
+            return
+
+        if path != "/api/analyze":
             self.send_error(404)
             return
 
@@ -192,6 +214,7 @@ class DashHandler(BaseHTTPRequestHandler):
                     "validated_count": len(result["validated"]),
                     "findings_count": result["findings_count"],
                     "preview": result["findings"][:100],
+                    "actionable_kinds": sorted(ACTIONABLE_KINDS),
                 },
             )
         except Exception as exc:  # noqa: BLE001 — return API error to browser

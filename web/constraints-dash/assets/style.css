@@ -310,6 +310,15 @@ textarea {
   background: rgba(0, 0, 0, 0.2);
 }
 
+.stop-suggestions li.sugg-clickable {
+  cursor: pointer;
+}
+
+.stop-suggestions li.sugg-clickable:hover {
+  border-color: var(--warn);
+  background: rgba(240, 180, 41, 0.06);
+}
+
 .sugg-priority {
   font-family: var(--mono);
   font-size: 10px;
@@ -471,6 +480,66 @@ tbody tr.selected {
   padding: 0.75rem;
   max-height: 180px;
   overflow: auto;
+}
+
+.crib-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.crib-actions.hidden { display: none; }
+
+.crib-anchor {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.crib-anchor input {
+  width: 5rem;
+}
+
+.btn-inline {
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.crib-hint {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  line-height: 1.4;
+}
+
+.field-hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent-2);
+  min-height: 1.2em;
+}
+
+.field-hint.flash {
+  color: var(--accent);
+}
+
+tbody tr.actionable .kind::after {
+  content: " ↳";
+  color: var(--warn);
+  font-size: 10px;
+}
+
+tbody tr.actionable:hover .kind {
+  color: var(--warn);
+}
+
+.pins-json-highlight {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px rgba(61, 214, 140, 0.25);
 }
 
 .logbar {

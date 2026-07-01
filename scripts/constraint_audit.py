@@ -157,6 +157,26 @@ def audit_stop_diagnosis(report: AuditReport) -> None:
             report.ok(f"stop_diagnosis: {slug} → {expected}")
 
 
+def audit_crib_hints(report: AuditReport) -> None:
+    from cipherops.constraints.crib_hints import crib_pins_from_finding, merge_crib_pins
+
+    finding = {
+        "kind": "pt_difference",
+        "data": {"pos": 3, "msg_a": 0, "msg_b": 2, "ct_a": 10, "ct_b": 25, "pt_delta_mod": 68},
+    }
+    hint = crib_pins_from_finding(finding, deck_size=83, anchor_pt=10)
+    if len(hint["pins"]) == 2 and hint["pins"][1]["pt"] == (10 + 68) % 83:
+        report.ok("crib_hints: pt_difference → dual pins with mod arithmetic")
+    else:
+        report.fail(f"crib_hints: pt_difference pins wrong ({hint['pins']})")
+
+    merged = merge_crib_pins([{"msg": 0, "pos": 1, "pt": 5}], hint["pins"])
+    if len(merged) >= 2:
+        report.ok("crib_hints: merge_crib_pins combines without duplicate keys")
+    else:
+        report.fail("crib_hints: merge failed")
+
+
 def main() -> int:
     report = AuditReport()
     audit_shared_keystream(report)
@@ -164,6 +184,7 @@ def main() -> int:
     audit_dynamic_perm(report)
     audit_merge(report)
     audit_stop_diagnosis(report)
+    audit_crib_hints(report)
 
     print("=" * 72)
     print("CONSTRAINT PROPAGATOR AUDIT")

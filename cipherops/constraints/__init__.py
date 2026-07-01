@@ -28,6 +28,7 @@ from cipherops.constraints.pipeline import (
     finding_fingerprint,
 )
 from cipherops.constraints.adhoc import build_custom_config, list_dashboard_sources, propagator_for_slug
+from cipherops.constraints.crib_hints import crib_pins_from_finding, merge_crib_pins, ACTIONABLE_KINDS
 
 __all__ = [
     "AlphabetDomain",
@@ -58,4 +59,7 @@ __all__ = [
     "build_custom_config",
     "list_dashboard_sources",
     "propagator_for_slug",
+    "crib_pins_from_finding",
+    "merge_crib_pins",
+    "ACTIONABLE_KINDS",
 ]

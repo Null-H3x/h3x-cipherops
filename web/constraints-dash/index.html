@@ -116,6 +116,7 @@
       <label class="field">
         <span>Crib pins (JSON)</span>
         <textarea id="pins-json" rows="2" placeholder='[{"pos":1,"msg":0,"pt":10}]'></textarea>
+        <span id="pins-json-hint" class="field-hint"></span>
       </label>
 
       <label class="field inline">
@@ -191,6 +192,14 @@
 
       <section class="panel detail-panel">
         <h2 class="panel-title">Finding detail</h2>
+        <div id="crib-actions" class="crib-actions hidden">
+          <label class="field inline crib-anchor">
+            <span>Anchor pt</span>
+            <input id="crib-anchor-pt" type="number" value="10" min="0" />
+          </label>
+          <button id="apply-crib-btn" class="btn btn-primary btn-inline">↳ Apply crib pins</button>
+          <p id="crib-hint" class="crib-hint"></p>
+        </div>
         <pre id="finding-detail" class="terminal">{}</pre>
       </section>
     </main>

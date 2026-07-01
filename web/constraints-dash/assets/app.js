@@ -7,6 +7,9 @@ const state = {
   total: 0,
   sources: null,
   kinds: new Set(),
+  lastConfig: null,
+  selectedFinding: null,
+  actionableKinds: new Set(["pt_difference", "equality", "keystream_pin", "assignment", "stream_pin"]),
 };
 
 const $ = (id) => document.getElementById(id);
@@ -98,6 +101,115 @@ function buildPayload() {
   return payload;
 }
 
+function isActionableFinding(row) {
+  if (!row) return false;
+  if (row.kind === "assignment") return row.data?.field === "pt";
+  if (row.kind === "stream_pin") return row.data?.role === "seed";
+  return state.actionableKinds.has(row.kind);
+}
+
+function mergePins(existing, incoming) {
+  const keyed = new Map();
+  for (const pin of [...existing, ...incoming]) {
+    keyed.set(`${pin.msg ?? "all"}:${pin.pos}`, pin);
+  }
+  return [...keyed.values()];
+}
+
+function setPinsJson(pins, hintText) {
+  const field = $("pins-json");
+  field.value = JSON.stringify(pins, null, 2);
+  field.classList.add("pins-json-highlight");
+  setTimeout(() => field.classList.remove("pins-json-highlight"), 1800);
+  if (hintText) {
+    const hint = $("pins-json-hint");
+    hint.textContent = hintText;
+    hint.classList.add("flash");
+    setTimeout(() => hint.classList.remove("flash"), 2500);
+  }
+  field.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+async function fetchCribHint(finding, anchorPt) {
+  let existingPins = [];
+  try { existingPins = parsePins(); } catch { existingPins = []; }
+
+  const res = await fetch("/api/crib-from-finding", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      finding,
+      deck_size: state.lastConfig?.deck_size ?? 83,
+      anchor_pt: anchorPt,
+      existing_pins: existingPins,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Crib hint failed");
+  return data;
+}
+
+function showFindingDetail(row) {
+  state.selectedFinding = row;
+  $("finding-detail").textContent = JSON.stringify(row, null, 2);
+
+  const actions = $("crib-actions");
+  if (!isActionableFinding(row)) {
+    actions.classList.add("hidden");
+    return;
+  }
+
+  actions.classList.remove("hidden");
+  $("crib-hint").textContent = "Loading crib suggestion…";
+  fetchCribHint(row, Number($("crib-anchor-pt").value) || 10)
+    .then((data) => {
+      $("crib-hint").textContent = data.hint || "";
+      state.lastCribHint = data;
+    })
+    .catch((err) => {
+      $("crib-hint").textContent = err.message;
+    });
+}
+
+async function applyCribFromSelected(merge = true) {
+  const row = state.selectedFinding;
+  if (!row || !isActionableFinding(row)) return;
+
+  const anchorPt = Number($("crib-anchor-pt").value) || 10;
+  const data = await fetchCribHint(row, anchorPt);
+  if (!data.actionable || !data.pins?.length) {
+    log(`Crib: not actionable for ${row.kind}`);
+    return;
+  }
+
+  let pins = data.pins;
+  if (merge) {
+    let existing = [];
+    try { existing = parsePins(); } catch { /* keep empty */ }
+    pins = data.merged_pins || mergePins(existing, data.pins);
+  }
+
+  setPinsJson(pins, data.hint);
+  log(`Crib pins applied from ${row.kind} @ pos ${row.data?.pos ?? "?"}`);
+  log(`  ${data.hint}`);
+}
+
+function applyCribFromSuggestion(exampleText) {
+  const trimmed = exampleText.trim();
+  if (!trimmed.startsWith("[")) return false;
+  try {
+    const pins = JSON.parse(trimmed);
+    if (!Array.isArray(pins)) return false;
+    let merged = pins;
+    try { merged = mergePins(parsePins(), pins); } catch { /* use pins only */ }
+    setPinsJson(merged, "Applied from stop suggestion");
+    log("Crib pins applied from stop suggestion");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function renderStop(stop) {
   const panel = $("stop-panel");
   if (!stop) {
@@ -125,8 +237,13 @@ function renderStop(stop) {
       <span class="sugg-priority ${s.priority}">${s.priority}</span>
       <span class="sugg-action">${s.action}</span>
       ${s.detail ? `<span class="sugg-meta">${s.detail}</span>` : ""}
-      ${s.example ? `<span class="sugg-meta">e.g. ${s.example}</span>` : ""}
+      ${s.example ? `<span class="sugg-meta sugg-example">e.g. ${s.example}</span>` : ""}
     `;
+    if (s.example && s.example.trim().startsWith("[")) {
+      li.classList.add("sugg-clickable");
+      li.title = "Click to apply example crib pins";
+      li.addEventListener("click", () => applyCribFromSuggestion(s.example));
+    }
     list.appendChild(li);
   });
 }
@@ -182,6 +299,7 @@ function renderFindings(rows) {
   rows.forEach((row, idx) => {
     const tr = document.createElement("tr");
     tr.dataset.idx = String(idx);
+    if (isActionableFinding(row)) tr.classList.add("actionable");
     const confClass = `badge badge-${row.confidence || "propagated"}`;
     tr.innerHTML = `
       <td>${row.round ?? "—"}</td>
@@ -193,7 +311,11 @@ function renderFindings(rows) {
     tr.addEventListener("click", () => {
       body.querySelectorAll("tr").forEach((r) => r.classList.remove("selected"));
       tr.classList.add("selected");
-      $("finding-detail").textContent = JSON.stringify(row, null, 2);
+      showFindingDetail(row);
+    });
+    tr.addEventListener("dblclick", () => {
+      showFindingDetail(row);
+      applyCribFromSelected(true).catch((e) => log(`Crib error: ${e.message}`));
     });
     body.appendChild(tr);
   });
@@ -223,6 +345,7 @@ async function fetchFindings() {
   if (!res.ok) throw new Error(data.error || "Failed to load findings");
 
   state.total = data.total;
+  if (data.config) state.lastConfig = data.config;
   renderFindings(data.rows);
   renderSummary(data);
 
@@ -249,6 +372,11 @@ async function runAnalysis() {
 
     state.session = data.session;
     state.offset = 0;
+    state.lastConfig = data.config;
+
+    if (data.actionable_kinds) {
+      state.actionableKinds = new Set(data.actionable_kinds);
+    }
 
     log(`Done: ${data.findings_count} findings, ${data.validated_count} validated, converged=${data.summary?.converged}`);
     const stop = data.summary?.stop;
@@ -335,6 +463,12 @@ function bindEvents() {
   $("propagator").addEventListener("change", updatePropagatorFields);
   $("run-btn").addEventListener("click", runAnalysis);
   $("load-sample-btn").addEventListener("click", loadAutokeySample);
+  $("apply-crib-btn").addEventListener("click", () => {
+    applyCribFromSelected(true).catch((e) => log(`Crib error: ${e.message}`));
+  });
+  $("crib-anchor-pt").addEventListener("change", () => {
+    if (state.selectedFinding) showFindingDetail(state.selectedFinding);
+  });
 
   ["filter-kind", "filter-confidence", "filter-round"].forEach((id) => {
     $(id).addEventListener("change", () => {
@@ -369,5 +503,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   showSourcePanel("preset");
   await loadSources();
   setStatus("idle", "IDLE");
-  log("Constraints Dash ready.");
+  log("Constraints Dash ready. Click a finding (↳ = crib-eligible); double-click to apply crib pins.");
 });
