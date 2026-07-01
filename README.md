@@ -1,155 +1,179 @@
 # LLM Cryptography
 
-A modular toolkit for **training language models on cryptography** and building a **CipherOps CLI suite** — from fingerprinting unknown ciphertext to smart brute-force attacks.
+An **HTML-based cryptographic puzzle solver** backed by a validated cipher engine (`cipherops/`). Paste or select ciphertext in the browser, identify the likely family, run constraint propagation and attacks, and iterate until the math grounds out or hits a wall with actionable next steps.
+
+The primary stress test is **[Noita Eyes](https://github.com/Null-H3x/Eyes)** — nine unsolved multi-message ciphertexts with a shared depth keystream. Solving Eyes is the byproduct of building a solver robust enough to handle arbitrary puzzle inputs, not the other way around.
 
 ---
 
-## 🧠 Vision
+## Vision
 
-> *Two parallel paths, converging at intelligence:*
+> **Identify → hypothesize → propagate → validate → attack → repeat**
 
-1. **Model Fine-Tuning Pipeline**  
-   Use `qwen3-coder-next` as a foundation and fine-tune it on:
-   - Classical & modern ciphers (ROT, Vigenère, XOR, RSA, AES)
-   - CTF-style problem solving
-   - RFC cryptospecs & math notation
+1. **Web solver (main product)**  
+   Browser UI for real cryptanalysis sessions: fingerprint unknown text, pick or auto-suggest a cipher family, run propagators and decoders, pin cribs, and watch findings converge (or stop with suggestions).
 
-2. **CipherOps CLI Toolkit**  
-   A composable set of tools for real-world cipher analysis:
-   - `fingerprint` — entropy, IC, Kasiski exam, key length estimation
-   - `classify` — heuristic detection (Caesar vs Vigenère vs Base64)
-   - `decode` — known-cipher decoders (ROT13, Base*, XOR)
-   - `convert` — hex ↔ base64 ↔ bin ↔ ASCII
-   - `brute-force` — parallel search over key space
+2. **Validated cipher engine (`cipherops/`)**  
+   77+ reversible cipher implementations, statistical profiling, and **constraint propagators** that emit mathematically checkable findings — not LLM guesses.
 
-> 🔗 **LLM + CLI Synergy**: The fine-tuned model can guide ambiguous cases or generate decoding hints.
+3. **Optional LLM layer (later)**  
+   A model may propose cribs or hypotheses; the engine accepts or rejects them. This repo does not treat constraint-findings JSONL as training data — it is too sparse and repetitive for fine-tuning.
 
 ---
 
-## 🚀 Quick Start
+## Quick start
 
-### 1. Clone & Setup
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/Null-H3x/LLM-Cryptography.git
 cd LLM-Cryptography
 
-pip install -r requirements-validate.txt   # cipher + dataset validation only
-# pip install -r requirements.txt          # full stack (ML fine-tuning)
+pip install -r requirements-validate.txt
 ```
 
-### 2. Validate datasets
+### 2. Run the puzzle solver UI
 
 ```bash
-PYTHONPATH=. python3 scripts/comprehensive_validate.py
-PYTHONPATH=. python3 scripts/comprehensive_validate.py --deep   # includes math_audit
-PYTHONPATH=. python3 scripts/paranoia_audit.py                 # paths, invariants, full suite
+PYTHONPATH=. python3 scripts/serve_constraints_dash.py
 ```
 
-Regenerate everything (datasets, ground truth, validation):
+Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/)
+
+| Input | Use for |
+|-------|---------|
+| **Paste ciphertext** | Autokey, GAK, custom decks |
+| **Noita eyes** | Nine-message shared-keystream puzzle |
+| **Fingerprinted dataset** | Known-family regression / demos |
+| **Preset corpus** | Validated propagation smoke tests |
+
+Workflow: run analysis → review **stop report** (`complete` vs `needs_information`) → click `pt_difference` rows to **auto-fill crib pins** → re-run until keystream or seed grounds.
+
+See [`web/constraints-dash/README.md`](web/constraints-dash/README.md) for API details.
+
+### 3. CLI (headless / scripting)
 
 ```bash
-PYTHONPATH=. python3 scripts/sync_repo.py
-PYTHONPATH=. python3 scripts/sync_repo.py --refresh-eyes   # also refresh Eyes corpus
-```
+# Entropy and index of coincidence
+python -m cipherops.cli fingerprint "Dlc aygmo zbsux jmh nswtq yzcb xfo pyjc byk."
 
-### 3. Try the CipherOps CLI (basic)
-
-```bash
-# Classify a ciphertext file
-python -m cipherops.cli classify example_cipher.txt
-
-# Convert hex to ASCII
-echo "48656c6c6f" | python -m cipherops.cli convert --from hex --to ascii
-```
-
-### 4. Fine-Tune Qwen3-Coder (LoRA)
-
-```bash
-python scripts/finetune_lora_qwen3.py \
-    --model_name "qwen/qwen3-coder-next" \
-    --dataset datasets/crypto-instruct-50.jsonl \
-    --output_dir checkpoints/lora-crypto-qwen
-```
-
----
-
-## 📂 Project Structure
-
-```
-LLM-Cryptography/
-├── cipherops/              # CLI + crypto analysis modules
-│   ├── ciphers/            # Validated classical & modern cipher implementations
-│   ├── analysis/           # Ciphertext profiling (fingerprint, freq, Kasiski, attacks)
-│   ├── fingerprint.py      # entropy, IC, Kasiski (re-exports analysis)
-│   └── cli.py              # click-based entrypoint (`fingerprint`, `analyze`)
-├── datasets/
-│   ├── fingerprinted/          # Validated plaintext/ciphertext pairs (61 cipher variants)
-│   ├── ciphertext-properties/  # Cryptanalytic metadata per ciphertext record
-│   └── unsolved/               # Real-world unsolved ciphertext corpora
-├── docs/math-formulas/         # Math definitions linked to cipher implementations
-├── Pre-LLM-Ingestion/
-│   └── processed/              # Audited ground-truth registry for pre-LLM ingestion
-├── scripts/
-│   ├── generate_datasets.py    # Regenerate validated fingerprinted datasets
-│   ├── validate_datasets.py    # Roundtrip validation
-│   ├── generate_ciphertext_properties.py  # Build property profiles
-│   ├── validate_ciphertext_properties.py  # Validate property datasets
-│   ├── import_eyes_corpus.py   # Import unsolved Noita eye corpus from Eyes repo
-│   ├── sync_repo.py            # Regenerate datasets + ground truth + validate
-│   ├── comprehensive_validate.py  # Full audit (solved + unsolved)
-│   ├── paranoia_audit.py          # Path anchoring, invariants, full script suite
-│   ├── math_audit.py              # KATs, roundtrips, analysis edge cases
-│   └── build_ground_truth.py   # Build Pre-LLM-Ingestion/processed corpus
-├── requirements-validate.txt   # Minimal deps for CI / dataset validation
-└── requirements.txt            # Full stack (ML fine-tuning + crypto)
-```
-
----
-
-## 📊 Datasets
-
-| Corpus | Path | Records | Status |
-|--------|------|---------|--------|
-| Fingerprinted ciphers | `datasets/fingerprinted/*/data.jsonl` | 610 (61 × 10) | solved, roundtrip-verified |
-| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 619 | fingerprint, frequency, Kasiski, coset IC, n-grams, attack surface |
-| Noita eye messages | `datasets/unsolved/noita-eye-messages/data.jsonl` | 9 | unsolved (from [Eyes](https://github.com/Null-H3x/Eyes)) |
-| Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 62 (61 solved + 1 unsolved) | audited |
-
-Math docs for every cipher: `docs/math-formulas/`. **Encodings** (PAM-5, Hex, Manchester, …): [`docs/math-formulas/encodings-catalog.md`](docs/math-formulas/encodings-catalog.md). **Unimplemented ciphers** (VIC, Enigma, …): [`docs/math-formulas/unimplemented-ciphers.md`](docs/math-formulas/unimplemented-ciphers.md). Cryptanalysis reference: [`docs/cryptanalysis/`](docs/cryptanalysis/). Full variable inventory: [`docs/variable-inventory.md`](docs/variable-inventory.md).
-
-Analyze a ciphertext from the CLI:
-
-```bash
-python -m cipherops.cli analyze "Dlc aygmo zbsux jmh nswtq yzcb xfo pyjc byk." --family vigenere
+# Full property profile (Kasiski, n-grams, attack surface)
 python -m cipherops.cli analyze "..." --family vigenere --json-out
 ```
 
----
+### 4. Validate the engine (developers)
 
-## 🛠️ Roadmap
+```bash
+PYTHONPATH=. python3 scripts/comprehensive_validate.py
+PYTHONPATH=. python3 scripts/constraint_audit.py
+PYTHONPATH=. python3 scripts/paranoia_audit.py
+```
 
-- [x] `cipherops/fingerprint.py` — Shannon entropy & index of coincidence
-- [x] Ciphertext properties dataset (fingerprint, frequency, Kasiski, n-grams, attack surface)
-- [x] Classical cipher datasets (28 variants, math-validated)
-- [x] Modern key cipher datasets (19 variants)
-- [x] Unsolved Noita eye corpus (Eyes repo import)
-- [x] Comprehensive validation + CI
-- [ ] `cipherops/classify.py` — heuristic classifier for common ciphers
-- [ ] Starter crypto Q&A dataset expansion
-- [ ] LoRA fine-tune script (Qwen3-Coder + PEFT)
-- [ ] LLM-guided brute-force hints (e.g., "Try key length 9")
+Regenerate datasets and ground truth:
 
----
-
-## 🤝 Contributing
-
-We welcome crypto-curious contributors!  
-Open an issue or PR — label it `cipherops`, `ft`, or `docs`.
+```bash
+PYTHONPATH=. python3 scripts/sync_repo.py
+PYTHONPATH=. python3 scripts/sync_repo.py --refresh-eyes   # refresh Eyes corpus from GitHub
+```
 
 ---
 
-## 📜 License
+## Architecture
 
-MIT © Null-H3x  
-See `LICENSE` file.
+```
+                    ┌─────────────────────────────┐
+                    │  web/constraints-dash       │
+                    │  (HTML puzzle solver UI)    │
+                    └──────────────┬──────────────┘
+                                   │ JSON API
+                    ┌──────────────▼──────────────┐
+                    │  cipherops/constraints/     │
+                    │  propagate → validate → loop│
+                    └──────────────┬──────────────┘
+           ┌───────────────────────┼───────────────────────┐
+           ▼                       ▼                       ▼
+   cipherops/ciphers/      cipherops/analysis/     datasets/
+   (77 variants)           (fingerprint, Kasiski)   fingerprinted + unsolved
+```
+
+| Layer | Role |
+|-------|------|
+| **`web/constraints-dash/`** | Primary interface — paste cipher, run toolset, browse findings, apply cribs |
+| **`cipherops/constraints/`** | Shared-keystream (Noita depth), autokey stream extension, GAK dynamic perm |
+| **`cipherops/ciphers/`** | Encrypt/decrypt implementations with math audit |
+| **`cipherops/analysis/`** | Ciphertext profiling and attack-viability metadata |
+| **`datasets/`** | Fingerprinted roundtrips (regression), unsolved corpora (Noita), property profiles |
+| **`scripts/`** | Dataset generation, validation, corpus import, dash server |
+
+Constraint propagation docs: [`docs/cryptanalysis/constraint-propagation.md`](docs/cryptanalysis/constraint-propagation.md).  
+Noita model: [`docs/math-formulas/noita-eye.md`](docs/math-formulas/noita-eye.md).
+
+---
+
+## Project structure
+
+```
+LLM-Cryptography/
+├── web/constraints-dash/       # HTML/CSS/JS puzzle solver UI
+├── cipherops/
+│   ├── ciphers/                # Classical & modern cipher implementations
+│   ├── constraints/            # Propagators, validation loop, crib hints
+│   ├── analysis/               # Profiling (fingerprint, Kasiski, attacks)
+│   └── cli.py                  # Headless CLI
+├── datasets/
+│   ├── fingerprinted/          # Roundtrip-verified cipher samples (regression)
+│   ├── constraint-findings/    # Audited propagation outputs (oracle, not training)
+│   ├── ciphertext-properties/  # Statistical profiles per record
+│   └── unsolved/               # Noita eye messages (primary puzzle)
+├── docs/math-formulas/         # Math definitions per cipher family
+├── docs/cryptanalysis/         # Methods, taxonomy, constraint propagation
+└── scripts/
+    ├── serve_constraints_dash.py
+    ├── generate_constraint_findings.py
+    ├── import_eyes_corpus.py
+    ├── sync_repo.py
+    └── … validation & audit suite
+```
+
+---
+
+## Datasets (supporting the solver, not the product)
+
+| Corpus | Path | Purpose |
+|--------|------|---------|
+| Fingerprinted ciphers | `datasets/fingerprinted/` | Prove implementations; demo known families in the UI |
+| Noita eye messages | `datasets/unsolved/noita-eye-messages/` | Primary unsolved puzzle (9 messages, deck size 83) |
+| Constraint findings | `datasets/constraint-findings/` | Reproducible propagation audit trail |
+| Ciphertext properties | `datasets/ciphertext-properties/` | Precomputed stats for fingerprinted records |
+
+Math docs: [`docs/math-formulas/`](docs/math-formulas/). Cryptanalysis reference: [`docs/cryptanalysis/`](docs/cryptanalysis/).
+
+---
+
+## Roadmap (solver-first)
+
+- [x] Validated cipher implementations (77 variants) + math audit
+- [x] Constraint propagators (shared keystream, autokey, GAK)
+- [x] Validated findings loop with graceful stop + suggestions
+- [x] HTML dashboard — paste cipher, run toolset, crib auto-fill from findings
+- [x] Noita corpus import and depth propagation
+- [ ] **Family identification** in the UI — fingerprint → suggested propagator / decoder
+- [ ] **Unified attack lane** — route pasted input to decrypt, brute, or propagate automatically
+- [ ] **Noita solver session** — partial keystream map, column coverage, crib-drag helpers
+- [ ] **Crib-drag engine** — try word lists at offsets across all nine messages
+- [ ] Runnable attack execution (beyond schema/heuristics)
+- [ ] Optional LLM hypothesis proposer (engine remains source of truth)
+
+Legacy / optional: LoRA fine-tuning scripts and Pre-LLM ingestion remain in the repo but are not the primary direction.
+
+---
+
+## Contributing
+
+Open an issue or PR — label it `solver`, `cipherops`, or `docs`.
+
+---
+
+## License
+
+MIT © Null-H3x — see `LICENSE`.
