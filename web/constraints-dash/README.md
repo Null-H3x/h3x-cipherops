@@ -28,4 +28,6 @@ Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/)
 | POST | `/api/analyze` | Run validated loop; returns session id |
 | GET | `/api/findings?session=…` | Paginated / filtered findings |
 
+Each analyze response includes a **`stop`** object: `complete`, `needs_information`, `conflict`, etc., with prioritized suggestions when the loop hits a wall.
+
 Uses Python stdlib `http.server` only — no extra web dependencies.

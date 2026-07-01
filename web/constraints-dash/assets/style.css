@@ -209,7 +209,7 @@ textarea {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -256,6 +256,84 @@ textarea {
 
 .round-chip.done { border-color: var(--accent); color: var(--accent); }
 .round-chip.warn { border-color: var(--warn); color: var(--warn); }
+
+.stop-panel {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-panel-2);
+}
+
+.stop-panel.hidden { display: none; }
+
+.stop-panel.status-complete { border-color: var(--accent); }
+.stop-panel.status-needs_information { border-color: var(--warn); }
+.stop-panel.status-conflict,
+.stop-panel.status-validation_failed { border-color: var(--danger); }
+.stop-panel.status-max_rounds { border-color: var(--accent-2); }
+
+.stop-headline {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-2);
+  margin-bottom: 0.35rem;
+}
+
+.stop-panel.status-complete .stop-headline { color: var(--accent); }
+.stop-panel.status-needs_information .stop-headline { color: var(--warn); }
+.stop-panel.status-conflict .stop-headline,
+.stop-panel.status-validation_failed .stop-headline { color: var(--danger); }
+
+.stop-detail {
+  margin: 0 0 0.65rem;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.stop-suggestions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stop-suggestions li {
+  font-size: 12px;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sugg-priority {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-right: 0.5rem;
+}
+
+.sugg-priority.high { color: var(--danger); }
+.sugg-priority.medium { color: var(--warn); }
+.sugg-priority.low { color: var(--text-dim); }
+
+.sugg-action {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.sugg-meta {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+}
 
 .findings-panel {
   display: flex;

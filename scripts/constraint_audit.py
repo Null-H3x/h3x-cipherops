@@ -22,6 +22,8 @@ from cipherops.constraints import (
     propagate_from_crib_prefix,
     propagate_shared_keystream,
     propagate_stream_extension,
+    build_corpus_configs,
+    run_findings_loop,
 )
 
 
@@ -129,12 +131,39 @@ def audit_merge(report: AuditReport) -> None:
         report.fail("merge_findings: failed")
 
 
+def audit_stop_diagnosis(report: AuditReport) -> None:
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    configs = {c.slug: c for c in build_corpus_configs(root)}
+
+    cases = [
+        ("autokey-demo", "complete"),
+        ("noita-eye-messages", "needs_information"),
+        ("noita-eye-crib-demo", "complete"),
+        ("gak-ctak-right-demo", "complete"),
+    ]
+    for slug, expected in cases:
+        cfg = configs.get(slug)
+        if cfg is None:
+            report.fail(f"stop_diagnosis: missing config {slug}")
+            continue
+        result = run_findings_loop(cfg, max_rounds=10)
+        if result.stop is None:
+            report.fail(f"stop_diagnosis: {slug} missing stop report")
+        elif result.stop.status != expected:
+            report.fail(f"stop_diagnosis: {slug} expected {expected}, got {result.stop.status}")
+        else:
+            report.ok(f"stop_diagnosis: {slug} → {expected}")
+
+
 def main() -> int:
     report = AuditReport()
     audit_shared_keystream(report)
     audit_stream_extension(report)
     audit_dynamic_perm(report)
     audit_merge(report)
+    audit_stop_diagnosis(report)
 
     print("=" * 72)
     print("CONSTRAINT PROPAGATOR AUDIT")

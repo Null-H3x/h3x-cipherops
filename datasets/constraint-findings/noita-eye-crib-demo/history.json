@@ -91,5 +91,11 @@
   ],
   "final_validated_count": 3586,
   "remaining_conflicts": 0,
-  "converged": true
+  "converged": true,
+  "stop": {
+    "status": "complete",
+    "headline": "Grounded \u2014 shared keystream pinned from cribs",
+    "detail": "Keystream fixed at 1 position(s); pt assignments propagated across messages.",
+    "suggestions": []
+  }
 }

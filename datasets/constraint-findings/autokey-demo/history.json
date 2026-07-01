@@ -26,5 +26,11 @@
   "grounded_pins": [],
   "final_validated_count": 36,
   "remaining_conflicts": 0,
-  "converged": true
+  "converged": true,
+  "stop": {
+    "status": "complete",
+    "headline": "Grounded \u2014 seed verified",
+    "detail": "Hard seed assignment survived decrypt verification.",
+    "suggestions": []
+  }
 }

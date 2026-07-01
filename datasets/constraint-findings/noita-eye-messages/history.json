@@ -26,5 +26,31 @@
   "grounded_pins": [],
   "final_validated_count": 3568,
   "remaining_conflicts": 0,
-  "converged": true
+  "converged": true,
+  "stop": {
+    "status": "needs_information",
+    "headline": "Hit a wall \u2014 structural depth only, no keystream cribs yet",
+    "detail": "Identical/differing ciphertext columns mapped; shared K[t] not fixed without plaintext pins.",
+    "suggestions": [
+      {
+        "priority": "high",
+        "category": "crib",
+        "action": "Pin plaintext at a known position on one message",
+        "detail": "A single pt crib fixes shared K[t] and propagates to all messages at that depth.",
+        "example": "[{\"pos\":1,\"msg\":0,\"pt\":10}]"
+      },
+      {
+        "priority": "medium",
+        "category": "structure",
+        "action": "Use pt_difference rows to plan crib drag across messages",
+        "detail": "3549 pairwise difference(s) at differing ciphertext columns \u2014 drag candidate plaintext offsets."
+      },
+      {
+        "priority": "low",
+        "category": "structure",
+        "action": "Exploit depth equalities where all messages share ciphertext",
+        "detail": "17 positions force identical plaintext under shared K[t]."
+      }
+    ]
+  }
 }

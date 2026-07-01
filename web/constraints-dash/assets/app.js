@@ -98,6 +98,55 @@ function buildPayload() {
   return payload;
 }
 
+function renderStop(stop) {
+  const panel = $("stop-panel");
+  if (!stop) {
+    panel.classList.add("hidden");
+    $("stat-stop").textContent = "—";
+    return;
+  }
+
+  panel.classList.remove("hidden");
+  panel.className = `stop-panel status-${stop.status}`;
+  $("stat-stop").textContent = stop.status.replace(/_/g, " ");
+  $("stop-headline").textContent = stop.headline;
+  $("stop-detail").textContent = stop.detail || "";
+
+  const list = $("stop-suggestions");
+  list.innerHTML = "";
+  if (!stop.suggestions?.length) {
+    list.innerHTML = '<li class="sugg-meta">No further inputs required at this fixpoint.</li>';
+    return;
+  }
+
+  stop.suggestions.forEach((s) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="sugg-priority ${s.priority}">${s.priority}</span>
+      <span class="sugg-action">${s.action}</span>
+      ${s.detail ? `<span class="sugg-meta">${s.detail}</span>` : ""}
+      ${s.example ? `<span class="sugg-meta">e.g. ${s.example}</span>` : ""}
+    `;
+    list.appendChild(li);
+  });
+}
+
+function applyStatusFromStop(stop) {
+  if (!stop) {
+    setStatus("idle", "IDLE");
+    return;
+  }
+  const map = {
+    complete: ["ok", "GROUNDED"],
+    needs_information: ["run", "NEEDS INFO"],
+    conflict: ["err", "CONFLICT"],
+    validation_failed: ["err", "REJECTED"],
+    max_rounds: ["run", "MAX ROUNDS"],
+  };
+  const [kind, label] = map[stop.status] || ["idle", "IDLE"];
+  setStatus(kind, label);
+}
+
 function renderSummary(data) {
   const s = data.summary || {};
   $("stat-corpus").textContent = data.config?.slug || "—";
@@ -106,6 +155,10 @@ function renderSummary(data) {
   $("stat-validated").textContent = s.final_validated_count ?? data.validated_count ?? "—";
   $("stat-conflicts").textContent = s.remaining_conflicts ?? "—";
   $("stat-converged").textContent = s.converged ? "yes" : "no";
+
+  const stop = s.stop || data.stop;
+  renderStop(stop);
+  applyStatusFromStop(stop);
 
   const timeline = $("round-timeline");
   timeline.innerHTML = "";
@@ -198,6 +251,11 @@ async function runAnalysis() {
     state.offset = 0;
 
     log(`Done: ${data.findings_count} findings, ${data.validated_count} validated, converged=${data.summary?.converged}`);
+    const stop = data.summary?.stop;
+    if (stop) {
+      log(`STOP: ${stop.headline}`);
+      (stop.suggestions || []).forEach((s) => log(`  → [${s.priority}] ${s.action}`));
+    }
 
     // Populate kind / round filters from preview + summary
     const kindSelect = $("filter-kind");
@@ -222,7 +280,7 @@ async function runAnalysis() {
 
     renderSummary(data);
     await fetchFindings();
-    setStatus("ok", "READY");
+    if (!data.summary?.stop) setStatus("ok", "READY");
   } catch (err) {
     log(`ERROR: ${err.message}`);
     setStatus("err", "ERROR");

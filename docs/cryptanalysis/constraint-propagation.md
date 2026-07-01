@@ -100,12 +100,13 @@ PYTHONPATH=. python3 scripts/validate_constraint_findings.py
 
 The generator runs propagators, **mathematically validates** each hard finding against source corpora, promotes validated pins into `ConstraintState`, and **re-propagates** until fixpoint (or max rounds). Rejected hard findings stop the loop and fail validation.
 
-Programmatic loop:
+Each run also emits a **`stop`** report: `complete`, `needs_information`, `conflict`, `validation_failed`, or `max_rounds`, with prioritized suggestions (cribs, seeds, plaintext, etc.).
 
 ```python
 from cipherops.constraints.pipeline import build_corpus_configs, run_findings_loop
 
-for config in build_corpus_configs("."):
-    result = run_findings_loop(config, max_rounds=10)
-    print(config.slug, result.converged, len(result.final_validated))
+result = run_findings_loop(config, max_rounds=10)
+print(result.stop.status, result.stop.headline)
+for s in result.stop.suggestions:
+    print(s.priority, s.action)
 ```

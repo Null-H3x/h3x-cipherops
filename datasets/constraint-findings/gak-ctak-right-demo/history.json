@@ -26,5 +26,11 @@
   "grounded_pins": [],
   "final_validated_count": 38,
   "remaining_conflicts": 0,
-  "converged": true
+  "converged": true,
+  "stop": {
+    "status": "complete",
+    "headline": "Grounded \u2014 single PRNG seed survives",
+    "detail": "Seed 42 verified against plaintext/ciphertext stream.",
+    "suggestions": []
+  }
 }
