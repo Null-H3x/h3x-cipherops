@@ -21,9 +21,11 @@ def sha256_json(value: object) -> str:
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_ROOT = ROOT / "datasets" / "fingerprinted"
 UNSOLVED_ROOT = ROOT / "datasets" / "unsolved"
+PROPERTIES_ROOT = ROOT / "datasets" / "ciphertext-properties"
 GROUND_TRUTH = ROOT / "Pre-LLM-Ingestion" / "processed" / "cipher-ground-truth.jsonl"
 MANIFEST = DATASET_ROOT / "manifest.json"
 UNSOLVED_MANIFEST = UNSOLVED_ROOT / "manifest.json"
+PROPERTIES_MANIFEST = PROPERTIES_ROOT / "manifest.json"
 
 REQUIRED_FIELDS = {
     "id",
@@ -126,6 +128,9 @@ def validate_ground_truth(report: ValidationReport) -> None:
             report.fail(f"Ground truth math_ref mismatch for {record['variant_slug']}")
         if record["cipher_family"] != spec.family:
             report.fail(f"Ground truth family mismatch for {record['variant_slug']}")
+        expected_props = f"datasets/ciphertext-properties/{record['variant_slug']}/properties.jsonl"
+        if record.get("properties_path") != expected_props:
+            report.fail(f"Ground truth properties_path mismatch for {record['variant_slug']}")
 
     for record in unsolved_records:
         math_path = ROOT / record["math_ref"]
@@ -134,6 +139,9 @@ def validate_ground_truth(report: ValidationReport) -> None:
         dataset_path = ROOT / record["dataset_path"]
         if not dataset_path.is_file():
             report.fail(f"Missing unsolved dataset: {record['dataset_path']}")
+        props_path = ROOT / record.get("properties_path", "")
+        if not props_path.is_file():
+            report.fail(f"Missing unsolved properties: {record.get('properties_path')}")
 
 
 def validate_dataset_file(path: Path, report: ValidationReport) -> int:
@@ -342,6 +350,75 @@ def validate_unsolved_datasets(report: ValidationReport) -> None:
     report.ok(f"Unsolved datasets validated ({len(manifest)} corpora)")
 
 
+def validate_ciphertext_properties(report: ValidationReport) -> None:
+    if not PROPERTIES_MANIFEST.is_file():
+        report.fail(f"Missing properties manifest: {PROPERTIES_MANIFEST}")
+        return
+
+    from cipherops.analysis.profile import ANALYZER_VERSION, analyze_ciphertext
+
+    manifest = json.loads(PROPERTIES_MANIFEST.read_text())
+    attack_vectors = {
+        "crib_dragging",
+        "brute_force",
+        "dictionary",
+        "hill_climbing",
+        "metaheuristic",
+        "side_channel",
+    }
+
+    for entry in manifest:
+        slug = entry["slug"]
+        path = ROOT / entry["path"]
+        source = ROOT / entry["source_path"]
+        if not path.is_file():
+            report.fail(f"Properties missing: {path}")
+            continue
+        if not source.is_file():
+            report.fail(f"Properties source missing: {source}")
+            continue
+
+        source_by_id = {
+            json.loads(line)["id"]: json.loads(line)
+            for line in source.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+        lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        if len(lines) != entry["count"]:
+            report.fail(f"{slug}: expected {entry['count']} property records, found {len(lines)}")
+
+        for line_no, line in enumerate(lines, start=1):
+            prefix = f"properties:{slug}:{line_no}"
+            record = json.loads(line)
+            if record["id"] not in source_by_id:
+                report.fail(f"{prefix}: unknown id {record['id']!r}")
+                continue
+            if set(record.get("attacks", {})) != attack_vectors:
+                report.fail(f"{prefix}: incomplete attack surface")
+
+            src = source_by_id[record["id"]]
+            status = "unsolved" if src.get("plaintext") is None else "solved"
+            recomputed = analyze_ciphertext(
+                src["ciphertext"],
+                cipher_family=src["cipher_family"],
+                era=src.get("era", "classical"),
+                status=status,
+                params=src.get("params"),
+                deck_size=src.get("params", {}).get("deck_size"),
+            )
+            stored = record["validation"].get("properties_sha256")
+            payload = json.dumps(recomputed, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+            expected = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+            if stored != expected:
+                report.fail(f"{prefix}: properties_sha256 mismatch")
+            elif record["validation"].get("analyzer_version") != ANALYZER_VERSION:
+                report.fail(f"{prefix}: analyzer_version mismatch")
+            else:
+                report.inc("properties_records_ok")
+
+    report.ok(f"Ciphertext properties validated ({len(manifest)} corpora)")
+
+
 def validate_live_registry_roundtrip(report: ValidationReport) -> None:
     """Fresh encrypt/decrypt from registry (independent of stored ciphertext)."""
     for spec in CIPHER_REGISTRY:
@@ -399,6 +476,7 @@ def main() -> int:
     validate_plaintext_corpus(report)
     validate_datasets(report)
     validate_unsolved_datasets(report)
+    validate_ciphertext_properties(report)
     validate_live_registry_roundtrip(report)
     print_report(report)
     return 1 if report.errors else 0

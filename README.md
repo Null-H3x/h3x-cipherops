@@ -78,19 +78,21 @@ python scripts/finetune_lora_qwen3.py \
 LLM-Cryptography/
 ├── cipherops/              # CLI + crypto analysis modules
 │   ├── ciphers/            # Validated classical & modern cipher implementations
-│   ├── fingerprint.py      # entropy, IC, Kasiski
-│   └── cli.py              # click-based entrypoint
+│   ├── analysis/           # Ciphertext profiling (fingerprint, freq, Kasiski, attacks)
+│   ├── fingerprint.py      # entropy, IC, Kasiski (re-exports analysis)
+│   └── cli.py              # click-based entrypoint (`fingerprint`, `analyze`)
 ├── datasets/
 │   ├── fingerprinted/          # Validated plaintext/ciphertext pairs (47 cipher variants)
-│   │   └── manifest.json
+│   ├── ciphertext-properties/  # Cryptanalytic metadata per ciphertext record
 │   └── unsolved/               # Real-world unsolved ciphertext corpora
-│       └── noita-eye-messages/ # Noita eye puzzle (from Eyes repo)
 ├── docs/math-formulas/         # Math definitions linked to cipher implementations
 ├── Pre-LLM-Ingestion/
 │   └── processed/              # Audited ground-truth registry for pre-LLM ingestion
 ├── scripts/
 │   ├── generate_datasets.py    # Regenerate validated fingerprinted datasets
 │   ├── validate_datasets.py    # Roundtrip validation
+│   ├── generate_ciphertext_properties.py  # Build property profiles
+│   ├── validate_ciphertext_properties.py  # Validate property datasets
 │   ├── import_eyes_corpus.py   # Import unsolved Noita eye corpus from Eyes repo
 │   ├── sync_repo.py            # Regenerate datasets + ground truth + validate
 │   ├── comprehensive_validate.py  # Full audit (solved + unsolved)
@@ -106,16 +108,25 @@ LLM-Cryptography/
 | Corpus | Path | Records | Status |
 |--------|------|---------|--------|
 | Fingerprinted ciphers | `datasets/fingerprinted/*/data.jsonl` | 470 (47 × 10) | solved, roundtrip-verified |
+| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 479 | fingerprint, frequency, Kasiski, n-grams, attack surface |
 | Noita eye messages | `datasets/unsolved/noita-eye-messages/data.jsonl` | 9 | unsolved (from [Eyes](https://github.com/Null-H3x/Eyes)) |
 | Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 48 | audited |
 
-Math docs for every cipher: `docs/math-formulas/`. Ground truth links ciphers → math → datasets.
+Math docs for every cipher: `docs/math-formulas/`. Ground truth links ciphers → math → datasets → property profiles.
+
+Analyze a ciphertext from the CLI:
+
+```bash
+python -m cipherops.cli analyze "Dlc aygmo zbsux jmh nswtq yzcb xfo pyjc byk." --family vigenere
+python -m cipherops.cli analyze "..." --family vigenere --json-out
+```
 
 ---
 
 ## 🛠️ Roadmap
 
 - [x] `cipherops/fingerprint.py` — Shannon entropy & index of coincidence
+- [x] Ciphertext properties dataset (fingerprint, frequency, Kasiski, n-grams, attack surface)
 - [x] Classical cipher datasets (28 variants, math-validated)
 - [x] Modern key cipher datasets (19 variants)
 - [x] Unsolved Noita eye corpus (Eyes repo import)

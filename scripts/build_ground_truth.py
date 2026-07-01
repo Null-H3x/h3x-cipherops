@@ -21,6 +21,7 @@ UNSOLVED_CORPORA = [
         "difficulty": None,
         "variants": ["noita-eye-messages"],
         "dataset_path": "datasets/unsolved/noita-eye-messages/data.jsonl",
+        "properties_path": "datasets/ciphertext-properties/noita-eye-messages/properties.jsonl",
         "audit_status": "unsolved_corpus_imported",
         "status": "unsolved",
         "source_repo": "https://github.com/Null-H3x/Eyes",
@@ -43,6 +44,7 @@ def main() -> None:
                 "difficulty": spec.difficulty,
                 "variants": list(spec.variants),
                 "dataset_path": f"datasets/fingerprinted/{spec.slug}/data.jsonl",
+                "properties_path": f"datasets/ciphertext-properties/{spec.slug}/properties.jsonl",
                 "audit_status": "math_implementation_verified",
                 "status": "solved",
             }

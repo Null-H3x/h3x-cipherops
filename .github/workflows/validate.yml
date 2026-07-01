@@ -24,3 +24,6 @@ jobs:
 
       - name: Dataset roundtrip validation
         run: PYTHONPATH=. python3 scripts/validate_datasets.py
+
+      - name: Ciphertext properties validation
+        run: PYTHONPATH=. python3 scripts/validate_ciphertext_properties.py

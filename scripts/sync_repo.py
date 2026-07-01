@@ -48,8 +48,16 @@ def main() -> int:
             label="Regenerate fingerprinted datasets",
         )
 
+    run(
+        [sys.executable, "scripts/generate_ciphertext_properties.py"],
+        label="Generate ciphertext property profiles",
+    )
     run([sys.executable, "scripts/build_ground_truth.py"], label="Build ground truth")
     run([sys.executable, "scripts/validate_datasets.py"], label="Validate datasets")
+    run(
+        [sys.executable, "scripts/validate_ciphertext_properties.py"],
+        label="Validate ciphertext properties",
+    )
     run(
         [sys.executable, "scripts/comprehensive_validate.py"],
         label="Comprehensive validation",

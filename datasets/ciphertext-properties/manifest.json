@@ -1,0 +1,338 @@
+[
+  {
+    "slug": "atbash",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/atbash/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/atbash/data.jsonl"
+  },
+  {
+    "slug": "caesar-rot13",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/caesar-rot13/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/caesar-rot13/data.jsonl"
+  },
+  {
+    "slug": "caesar-rot3",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/caesar-rot3/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/caesar-rot3/data.jsonl"
+  },
+  {
+    "slug": "affine-a2b5",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/affine-a2b5/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/affine-a2b5/data.jsonl"
+  },
+  {
+    "slug": "railfence-3",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/railfence-3/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/railfence-3/data.jsonl"
+  },
+  {
+    "slug": "baconian-ab",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/baconian-ab/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/baconian-ab/data.jsonl"
+  },
+  {
+    "slug": "polybius-square",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/polybius-square/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/polybius-square/data.jsonl"
+  },
+  {
+    "slug": "substitution-qwerty",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/substitution-qwerty/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/substitution-qwerty/data.jsonl"
+  },
+  {
+    "slug": "nomenclator-basic",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/nomenclator-basic/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/nomenclator-basic/data.jsonl"
+  },
+  {
+    "slug": "columnar-keyword",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/columnar-keyword/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/columnar-keyword/data.jsonl"
+  },
+  {
+    "slug": "autokey-standard",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/autokey-standard/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/autokey-standard/data.jsonl"
+  },
+  {
+    "slug": "autokey-beaufort",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/autokey-beaufort/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/autokey-beaufort/data.jsonl"
+  },
+  {
+    "slug": "beaufort-keyword",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/beaufort-keyword/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/beaufort-keyword/data.jsonl"
+  },
+  {
+    "slug": "porta-keyword",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/porta-keyword/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/porta-keyword/data.jsonl"
+  },
+  {
+    "slug": "running-key-book",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/running-key-book/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/running-key-book/data.jsonl"
+  },
+  {
+    "slug": "vigenere-keyword",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/vigenere-keyword/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/vigenere-keyword/data.jsonl"
+  },
+  {
+    "slug": "gronsfeld-31415",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/gronsfeld-31415/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/gronsfeld-31415/data.jsonl"
+  },
+  {
+    "slug": "homophonic-basic",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/homophonic-basic/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/homophonic-basic/data.jsonl"
+  },
+  {
+    "slug": "four-square-keys",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/four-square-keys/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/four-square-keys/data.jsonl"
+  },
+  {
+    "slug": "hill-2x2",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/hill-2x2/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/hill-2x2/data.jsonl"
+  },
+  {
+    "slug": "playfair-keyword",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/playfair-keyword/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/playfair-keyword/data.jsonl"
+  },
+  {
+    "slug": "adfgvx-keys",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/adfgvx-keys/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/adfgvx-keys/data.jsonl"
+  },
+  {
+    "slug": "adfgx-keys",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/adfgx-keys/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/adfgx-keys/data.jsonl"
+  },
+  {
+    "slug": "bifid-keyword",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/bifid-keyword/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/bifid-keyword/data.jsonl"
+  },
+  {
+    "slug": "straddle-default",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/straddle-default/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/straddle-default/data.jsonl"
+  },
+  {
+    "slug": "trifid-keyword",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/trifid-keyword/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/trifid-keyword/data.jsonl"
+  },
+  {
+    "slug": "b64",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/b64/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/b64/data.jsonl"
+  },
+  {
+    "slug": "fractionated-morse",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/fractionated-morse/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/fractionated-morse/data.jsonl"
+  },
+  {
+    "slug": "aes-128-gcm",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/aes-128-gcm/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/aes-128-gcm/data.jsonl"
+  },
+  {
+    "slug": "aes-256-gcm",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/aes-256-gcm/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/aes-256-gcm/data.jsonl"
+  },
+  {
+    "slug": "aes-128-cbc",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/aes-128-cbc/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/aes-128-cbc/data.jsonl"
+  },
+  {
+    "slug": "aes-256-cbc",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/aes-256-cbc/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/aes-256-cbc/data.jsonl"
+  },
+  {
+    "slug": "aes-128-ctr",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/aes-128-ctr/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/aes-128-ctr/data.jsonl"
+  },
+  {
+    "slug": "chacha20-poly1305",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/chacha20-poly1305/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/chacha20-poly1305/data.jsonl"
+  },
+  {
+    "slug": "tripledes-cbc",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/tripledes-cbc/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/tripledes-cbc/data.jsonl"
+  },
+  {
+    "slug": "fernet",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/fernet/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/fernet/data.jsonl"
+  },
+  {
+    "slug": "xor-sha256-stream",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/xor-sha256-stream/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/xor-sha256-stream/data.jsonl"
+  },
+  {
+    "slug": "pbkdf2-aes-gcm",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/pbkdf2-aes-gcm/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/pbkdf2-aes-gcm/data.jsonl"
+  },
+  {
+    "slug": "hkdf-aes-gcm",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/hkdf-aes-gcm/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/hkdf-aes-gcm/data.jsonl"
+  },
+  {
+    "slug": "rsa-oaep-hybrid",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/rsa-oaep-hybrid/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/rsa-oaep-hybrid/data.jsonl"
+  },
+  {
+    "slug": "ed25519-sign",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/ed25519-sign/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/ed25519-sign/data.jsonl"
+  },
+  {
+    "slug": "x25519-ecdh",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/x25519-ecdh/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/x25519-ecdh/data.jsonl"
+  },
+  {
+    "slug": "sha256",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/sha256/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/sha256/data.jsonl"
+  },
+  {
+    "slug": "sha512",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/sha512/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/sha512/data.jsonl"
+  },
+  {
+    "slug": "sha3-256",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/sha3-256/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/sha3-256/data.jsonl"
+  },
+  {
+    "slug": "blake2b",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/blake2b/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/blake2b/data.jsonl"
+  },
+  {
+    "slug": "hmac-sha256",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/hmac-sha256/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/hmac-sha256/data.jsonl"
+  },
+  {
+    "slug": "noita-eye-messages",
+    "count": 9,
+    "path": "datasets/ciphertext-properties/noita-eye-messages/properties.jsonl",
+    "corpus_type": "unsolved",
+    "source_path": "datasets/unsolved/noita-eye-messages/data.jsonl"
+  }
+]

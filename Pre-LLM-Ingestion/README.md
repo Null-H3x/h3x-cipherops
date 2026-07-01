@@ -20,6 +20,8 @@ Pre-LLM-Ingestion/
 Ground truth is generated from validated implementations in `cipherops/ciphers/` and cross-linked to `docs/math-formulas/`:
 
 ```bash
+PYTHONPATH=. python3 scripts/generate_ciphertext_properties.py
+PYTHONPATH=. python3 scripts/validate_ciphertext_properties.py
 PYTHONPATH=. python3 scripts/sync_repo.py              # regenerate + validate all
 PYTHONPATH=. python3 scripts/sync_repo.py --refresh-eyes
 PYTHONPATH=. python3 scripts/build_ground_truth.py
@@ -42,6 +44,7 @@ Each record in `processed/cipher-ground-truth.jsonl` includes:
 |---------|----------|--------|------|
 | `processed/cipher-ground-truth.jsonl` | Pre-LLM cipher registry | JSONL | 47 solved + 1 unsolved |
 | `datasets/fingerprinted/*/data.jsonl` | Plaintext/ciphertext pairs | JSONL | 10 samples × 47 ciphers |
+| `datasets/ciphertext-properties/*/properties.jsonl` | Cryptanalytic metadata | JSONL | 479 property profiles |
 | `datasets/unsolved/noita-eye-messages/data.jsonl` | Unsolved Noita eye puzzle | JSONL | 9 messages (no plaintext) |
 | `instruction-tuning/qwen-crypto-*.jsonl` | General crypto Q&A (legacy) | JSONL | 8 items |
 
