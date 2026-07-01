@@ -1,0 +1,25 @@
+# LLM Cryptography — Core Dependencies
+
+# Fine-tuning & model inference
+transformers>=4.40.0
+peft>=0.11.0
+bitsandbytes>=0.42.0
+accelerate>=0.29.0
+torch>=2.2.0
+sentencepiece>=0.2.0
+
+# Data handling & datasets
+datasets>=2.18.0
+pandas>=2.2.0
+
+# CLI tooling
+click>=8.1.0
+rich>=13.7.0
+
+# Crypto utilities (for cipherops module)
+pycrypto>=0.4.0  # or pycryptodome as modern alternative
+cryptography>=42.0.0
+
+# Dev & eval
+evaluate>=0.4.2
+scikit-learn>=1.4.0

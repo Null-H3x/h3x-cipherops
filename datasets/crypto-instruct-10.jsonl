@@ -1,0 +1,10 @@
+{"id": 1, "input": "", "instruction": "What is the ROT13 cipher and how does it work?", "output": "ROT13 is a substitution cipher that replaces each letter with the 13th letter after it in the alphabet. Since the alphabet has 26 letters, applying ROT13 twice returns the original text (itself). Example: 'HELLO' -> 'URYYB'."}
+{"id": 2, "input": "Uryyb Jvyyre!", "instruction": "Decode this ROT13 ciphertext", "output": "Hello World!"}
+{"id": 3, "input": "", "instruction": "What is the Caesar cipher and how is it different from ROT13?", "output": "The Caesar cipher shifts letters by a fixed number (often 3). ROT13 is a specific case of Caesar with shift=13. General Caesar requires brute-forcing 25 possible keys."}
+{"id": 4, "input": "OLSSV", "instruction": "If a Caesar cipher shifts by 7, what is the plaintext for OLSSV?", "output": "HELLO"}
+{"id": 5, "input": "", "instruction": "What is Vigenere cipher and how does it improve on Caesar?", "output": "Vigenere uses a keyword to apply multiple Caesar shifts cyclically. This obscures letter frequency patterns that make single-shift ciphers vulnerable."}
+{"id": 6, "input": "", "instruction": "Encrypt ATTACKATDAWN with key LEMON using Vigenere", "output": "LXFOPVEFRNHR"}
+{"id": 7, "input": "", "instruction": "What is the Index of Coincidence and why is it useful?", "output": "IC measures probability that two random letters are identical. English IC ~0.067, random ~0.038. Helps distinguish monoalphabetic vs polyalphabetic ciphers."}
+{"id": 8, "input": "", "instruction": "Calculate Shannon entropy of AABBBCCC", "output": "1.5 bits per symbol (3 As, 3 Bs, 2 Cs)"}
+{"id": 9, "input": "", "instruction": "What is Base64 encoding and where is it commonly used?", "output": "Base64 encodes binary data as ASCII using 64 characters. Used in email attachments, data URLs, JSON embedding."}
+{"id": 10, "input": "SGVsbG8gV29ybGQh", "instruction": "Decode this Base64 string", "output": "Hello World!"}
