@@ -21,10 +21,10 @@ Where:
 - $a^{-1}$ = modular multiplicative inverse of $a$ mod 26
 - $y$ = ciphertext character index
 
-## Modular Inverse Table (mod 26)
+## 🔑 Modular Inverse Table (mod 26)
 
-| $a$ | $a^{-1} \\mod 26$ |
-|-----|-------------------|
+| a | a^(-1) mod 26 |
+|---|---------------|
 | 1   | 1                 |
 | 3   | 9                 |
 | 5   | 21                |
