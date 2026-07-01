@@ -28,14 +28,31 @@ The primary stress test is **[Noita Eyes](https://github.com/Null-H3x/Eyes)** â€
 ```bash
 git clone https://github.com/Null-H3x/h3x-cipherops.git
 cd h3x-cipherops
+chmod +x run.sh
+./run.sh
+```
 
+Or from a **zip extract** â€” unzip, `cd` into the folder, then `./run.sh` (creates `.venv`, installs deps, starts the UI).
+
+```bash
+chmod +x run.sh          # once, if needed
+./run.sh                 # http://127.0.0.1:8765/
+./run.sh --lan           # VM / LAN: http://<your-ip>:8765/
+./run.sh --validate      # audit engine, then start UI
+./run.sh --setup-only    # install only, don't start server
+```
+
+Manual install (optional):
+
+```bash
 pip install -r requirements-validate.txt
 ```
 
 ### 2. Run the puzzle solver UI
 
 ```bash
-PYTHONPATH=. python3 scripts/serve_constraints_dash.py
+./run.sh
+# or: PYTHONPATH=. python3 scripts/serve_constraints_dash.py
 ```
 
 Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/)

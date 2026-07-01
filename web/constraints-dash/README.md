@@ -5,10 +5,17 @@ Browser dashboard for the constraint findings pipeline (`propagate → validate 
 ## Run
 
 ```bash
+chmod +x run.sh   # once
+./run.sh
+```
+
+Or from repo root without the wrapper:
+
+```bash
 PYTHONPATH=. python3 scripts/serve_constraints_dash.py
 ```
 
-Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/)
+Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/) — use `./run.sh --lan` on a VM to reach the UI from your host browser.
 
 ## Input modes
 
