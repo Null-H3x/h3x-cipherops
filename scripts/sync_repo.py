@@ -67,6 +67,10 @@ def main() -> int:
         label="Math & implementation audit",
     )
     run(
+        [sys.executable, "scripts/constraint_audit.py"],
+        label="Constraint propagator audit",
+    )
+    run(
         [sys.executable, "scripts/paranoia_audit.py"],
         label="Paranoia audit (paths, invariants, full suite)",
     )
