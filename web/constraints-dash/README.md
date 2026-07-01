@@ -17,14 +17,14 @@ PYTHONPATH=. python3 scripts/serve_constraints_dash.py
 
 Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/) — use `./run.sh --lan` on a VM to reach the UI from your host browser.
 
-## Input modes
+## Workflow
 
-| Mode | Description |
-|------|-------------|
-| **Preset corpus** | Built-in constraint-findings corpora (Noita, autokey, GAK demos) |
-| **Fingerprinted dataset** | Autokey / GAK variants from `datasets/fingerprinted/` |
-| **Noita eyes** | Full unsolved nine-message deck |
-| **Paste ciphertext** | Custom autokey, GAK, or integer deck JSON |
+1. **Source** — paste ciphertext (alphabetic, integer decks, etc.). Propagator and deck size start as **unknown**.
+2. **Identify cipher** — scans statistics and ranks family hypotheses.
+3. **Classification** — review hypotheses; click **Route → run** on one to apply propagator/deck routing and start the validated loop.
+4. **Findings** — explore rows, apply crib pins, re-run after new pins (Loop options in Source).
+
+Legacy preset/fingerprinted corpora remain available via the `/api/analyze` payload (`source: preset|fingerprinted|noita`) for scripts and tests.
 
 ## API
 
@@ -33,6 +33,7 @@ Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/) — use `./run.sh --lan` o
 | GET | `/api/health` | Liveness |
 | GET | `/api/sources` | Presets + fingerprinted slugs |
 | POST | `/api/classify` | Heuristic family hypotheses + dash routing |
+| POST | `/api/route-run` | Route a hypothesis + run validated loop |
 | POST | `/api/analyze` | Run validated loop; returns session id |
 | POST | `/api/crib-from-finding` | Crib pin suggestion from a finding row |
 | GET | `/api/findings?session=…` | Paginated / filtered findings |

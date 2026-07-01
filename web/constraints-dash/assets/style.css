@@ -118,6 +118,71 @@ body {
   overflow-y: auto;
 }
 
+.source-hint {
+  margin: 0 0 0.85rem;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.inferred-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.inferred {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.6rem;
+}
+
+.inferred-wide {
+  grid-column: 1 / -1;
+}
+
+.inferred-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.2rem;
+}
+
+.inferred-value {
+  display: block;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent-2);
+  word-break: break-word;
+}
+
+.inferred-value.unknown {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.source-advanced {
+  margin-top: 0.75rem;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.source-advanced summary {
+  cursor: pointer;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.source-advanced[open] summary {
+  color: var(--accent-2);
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -247,6 +312,27 @@ textarea {
   border-color: var(--accent);
 }
 
+.hyp-card.routed {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 1px rgba(86, 212, 221, 0.15);
+}
+
+.hyp-meta {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}
+
+.hyp-no-run {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 .hyp-card-header {
   display: flex;
   justify-content: space-between;
@@ -278,6 +364,10 @@ textarea {
 .hyp-card .btn {
   margin-top: 0.5rem;
   width: auto;
+}
+
+.hyp-card .btn-primary {
+  width: 100%;
 }
 
 .summary-grid {
@@ -633,7 +723,147 @@ tbody tr.actionable:hover .kind {
   color: var(--text-dim);
 }
 
+.recovery-panel {
+  padding: 1rem;
+}
+
+.recovery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.recovery-col {
+  min-width: 0;
+}
+
+.plaintext-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.pt-msg-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel-2);
+  padding: 0.55rem 0.65rem;
+}
+
+.pt-msg-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.35rem;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.pt-msg-label {
+  color: var(--accent-2);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pt-msg-text {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.12em;
+  word-break: break-all;
+  color: var(--accent);
+  white-space: pre-wrap;
+}
+
+.pt-msg-text.pt-full {
+  color: var(--text);
+  letter-spacing: normal;
+}
+
+.plaintext-full {
+  margin-top: 0.65rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.65rem;
+  background: rgba(61, 214, 140, 0.04);
+}
+
+.brute-notes {
+  margin: 0.5rem 0;
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.brute-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.brute-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.65rem;
+  background: var(--bg-panel-2);
+}
+
+.brute-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 11px;
+  margin-bottom: 0.35rem;
+}
+
+.brute-label {
+  color: var(--accent-2);
+  font-weight: 600;
+}
+
+.brute-score {
+  color: var(--text-dim);
+}
+
+.brute-preview {
+  margin: 0 0 0.45rem;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.brute-card .btn {
+  width: 100%;
+  margin: 0;
+}
+
+.brute-range-sep {
+  color: var(--text-dim);
+  padding: 0 0.25rem;
+}
+
+.brute-warn {
+  color: var(--warn) !important;
+}
+
+.brute-col .field.inline input[type="number"] {
+  width: 4.5rem;
+}
+
 @media (max-width: 1100px) {
+  .recovery-grid {
+    grid-template-columns: 1fr;
+  }
   .layout {
     grid-template-columns: 1fr;
   }

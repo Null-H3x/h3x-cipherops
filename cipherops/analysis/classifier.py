@@ -397,13 +397,22 @@ def _package(
     }
 
 
-def route_to_dash_payload(classification: dict[str, Any], hypothesis_index: int = 0) -> dict[str, Any]:
-    """Build a minimal analyze payload from a classification hypothesis."""
+def route_to_dash_payload(
+    classification: dict[str, Any],
+    hypothesis_index: int = 0,
+    *,
+    ciphertext: str | None = None,
+    pins: list[dict[str, Any]] | None = None,
+    max_rounds: int = 10,
+) -> dict[str, Any]:
+    """Build an analyze payload from a classification hypothesis + source ciphertext."""
     hyps = classification.get("hypotheses") or []
     if not hyps or hypothesis_index >= len(hyps):
         raise ValueError("No hypothesis at index")
     h = hyps[hypothesis_index]
-    payload: dict[str, Any] = {"max_rounds": 10}
+    payload: dict[str, Any] = {"max_rounds": max_rounds}
+    if pins:
+        payload["pins"] = pins
 
     mode = h.get("dash_mode", "custom")
     if mode == "noita":
@@ -422,4 +431,14 @@ def route_to_dash_payload(classification: dict[str, Any], hypothesis_index: int 
         payload["deck_size"] = h["deck_size"]
     if h.get("hypothesis"):
         payload["hypothesis"] = dict(h["hypothesis"])
+
+    ct = (ciphertext or "").strip()
+    if ct:
+        payload["ciphertext"] = ct
+    elif classification.get("has_decks"):
+        raise ValueError("Integer deck ciphertext required for this route")
+
+    if prop and prop != "none" and not ct and mode == "custom":
+        raise ValueError("Ciphertext required to route this hypothesis")
+
     return payload

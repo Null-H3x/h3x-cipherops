@@ -1,15 +1,14 @@
-/* H3X Constraints Dash — in-browser findings explorer */
+/* H3X Constraints Dash — identify → route → run */
 
 const state = {
   session: null,
   offset: 0,
   limit: 100,
   total: 0,
-  sources: null,
-  kinds: new Set(),
+  classification: null,
+  routedIndex: null,
   lastConfig: null,
   selectedFinding: null,
-  classification: null,
   actionableKinds: new Set(["pt_difference", "equality", "keystream_pin", "assignment", "stream_pin"]),
 };
 
@@ -28,78 +27,46 @@ function setStatus(kind, text) {
   pill.textContent = text;
 }
 
-function showSourcePanel(mode) {
-  ["preset", "fingerprinted", "custom"].forEach((m) => {
-    $(`panel-${m}`)?.classList.toggle("hidden", m !== mode);
-  });
-  $("panel-noita")?.classList.toggle("hidden", mode !== "noita");
+function getCiphertext() {
+  return $("ciphertext").value.trim();
 }
 
-function updatePropagatorFields() {
-  const prop = $("propagator").value;
-  $("stream-fields").classList.toggle("hidden", prop !== "stream_extension");
-  $("gak-fields").classList.toggle("hidden", prop !== "dynamic_perm");
-  $("deck-fields").classList.toggle("hidden", prop !== "shared_keystream");
+function resetInferred() {
+  $("inferred-propagator").textContent = "unknown";
+  $("inferred-propagator").classList.add("unknown");
+  $("inferred-deck-size").textContent = "unknown";
+  $("inferred-deck-size").classList.add("unknown");
+  $("inferred-route").textContent = "—";
+  $("inferred-route").classList.add("unknown");
+  state.routedIndex = null;
+}
+
+function setInferred(route) {
+  const prop = route?.propagator;
+  const deck = route?.deck_size;
+
+  const propEl = $("inferred-propagator");
+  propEl.textContent = prop && prop !== "none" ? prop.replace(/_/g, " ") : "unknown";
+  propEl.classList.toggle("unknown", !prop || prop === "none");
+
+  const deckEl = $("inferred-deck-size");
+  if (deck != null) {
+    deckEl.textContent = String(deck);
+    deckEl.classList.remove("unknown");
+  } else {
+    deckEl.textContent = "unknown";
+    deckEl.classList.add("unknown");
+  }
+
+  const routeEl = $("inferred-route");
+  routeEl.textContent = route?.label || "—";
+  routeEl.classList.toggle("unknown", !route?.label);
 }
 
 function parsePins() {
   const raw = $("pins-json").value.trim();
   if (!raw) return [];
   return JSON.parse(raw);
-}
-
-function buildPayload() {
-  const mode = $("source-mode").value;
-  const payload = {
-    session: state.session,
-    max_rounds: Number($("max-rounds").value) || 10,
-    pins: parsePins(),
-  };
-
-  if (mode === "preset") {
-    payload.source = "preset";
-    payload.preset_slug = $("preset-slug").value;
-    return payload;
-  }
-
-  if (mode === "fingerprinted") {
-    payload.source = "fingerprinted";
-    payload.dataset_slug = $("fp-slug").value;
-    const rid = $("fp-record-id").value.trim();
-    if (rid) payload.record_id = rid;
-    return payload;
-  }
-
-  if (mode === "noita") {
-    payload.source = "noita";
-    return payload;
-  }
-
-  payload.source = "custom";
-  payload.propagator = $("propagator").value;
-  payload.ciphertext = $("ciphertext").value.trim();
-
-  const pt = $("plaintext").value.trim();
-  if (pt) payload.plaintext = pt;
-
-  if (payload.propagator === "stream_extension") {
-    payload.hypothesis = {
-      family: "autokey",
-      variant: "standard",
-      extension: $("extension").value,
-      seed: $("seed").value.trim(),
-      seed_length: Number($("seed-length").value) || 3,
-    };
-  } else if (payload.propagator === "dynamic_perm") {
-    const center = Number($("prng-seed").value) || 42;
-    payload.hypothesis = { mode: $("gak-mode").value, prng_seed: center };
-    payload.seed_candidates = [center - 1, center, center + 1];
-  } else {
-    payload.deck_size = Number($("deck-size").value) || 83;
-    payload.hypothesis = { combiner: "add" };
-  }
-
-  return payload;
 }
 
 function isActionableFinding(row) {
@@ -357,99 +324,279 @@ async function fetchFindings() {
   $("page-next").disabled = state.offset + state.limit >= state.total;
 }
 
-async function runAnalysis() {
-  setStatus("run", "RUNNING");
-  log("Starting validated propagation loop…");
+function populateFiltersFromRun(data) {
+  const kindSelect = $("filter-kind");
+  const roundSelect = $("filter-round");
+  const kinds = new Set();
+  (data.preview || []).forEach((r) => kinds.add(r.kind));
+  kindSelect.innerHTML = '<option value="">All kinds</option>';
+  [...kinds].sort().forEach((k) => {
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.textContent = k;
+    kindSelect.appendChild(opt);
+  });
 
+  roundSelect.innerHTML = '<option value="">All rounds</option>';
+  (data.summary?.rounds || []).forEach((r) => {
+    const opt = document.createElement("option");
+    opt.value = String(r.round);
+    opt.textContent = `Round ${r.round}`;
+    roundSelect.appendChild(opt);
+  });
+}
+
+async function handleRunResponse(data) {
+  state.session = data.session;
+  state.offset = 0;
+  state.lastConfig = data.config;
+
+  if (data.actionable_kinds) {
+    state.actionableKinds = new Set(data.actionable_kinds);
+  }
+
+  if (data.route) {
+    state.routedIndex = data.route.hypothesis_index;
+    setInferred(data.route);
+  }
+
+  log(`Done: ${data.findings_count} findings, ${data.validated_count} validated, converged=${data.summary?.converged}`);
+  const stop = data.summary?.stop;
+  if (stop) {
+    log(`STOP: ${stop.headline}`);
+    (stop.suggestions || []).forEach((s) => log(`  → [${s.priority}] ${s.action}`));
+  }
+
+  populateFiltersFromRun(data);
+  renderSummary(data);
+  if (data.plaintext_view) {
+    renderPlaintextView(data.plaintext_view);
+  } else {
+    await fetchPlaintextView();
+  }
+  await fetchFindings();
+  updateBruteHint(data.summary?.stop);
+  if (!data.summary?.stop) setStatus("ok", "READY");
+}
+
+function renderPlaintextView(view) {
+  state.plaintextView = view;
+  const cov = $("plaintext-coverage");
+  const box = $("plaintext-messages");
+  const fullEl = $("plaintext-full-decrypt");
+
+  if (!view || !view.messages?.length) {
+    cov.textContent = "No assignments yet";
+    box.innerHTML = '<p class="classify-status">Ground pt pins or run shared-keystream cribs to fill positions.</p>';
+    fullEl.classList.add("hidden");
+    return;
+  }
+
+  const c = view.coverage || {};
+  cov.textContent = `${c.known ?? 0} / ${c.total ?? 0} positions (${Math.round((c.ratio ?? 0) * 100)}%)`;
+
+  box.innerHTML = "";
+  view.messages.forEach((msg) => {
+    const block = document.createElement("div");
+    block.className = "pt-msg-block";
+    block.innerHTML = `
+      <div class="pt-msg-head">
+        <span class="pt-msg-label">${msg.label}</span>
+        <span class="pt-msg-meta">${msg.known}/${msg.length} known</span>
+      </div>
+      <pre class="pt-msg-text">${msg.text || "—"}</pre>
+    `;
+    box.appendChild(block);
+  });
+
+  if (view.full_decrypt?.text) {
+    fullEl.classList.remove("hidden");
+    fullEl.innerHTML = `
+      <div class="pt-msg-head">
+        <span class="pt-msg-label">Full decrypt (verified seed: ${view.full_decrypt.seed})</span>
+      </div>
+      <pre class="pt-msg-text pt-full">${view.full_decrypt.text}</pre>
+    `;
+  } else {
+    fullEl.classList.add("hidden");
+    fullEl.innerHTML = "";
+  }
+}
+
+async function fetchPlaintextView() {
+  if (!state.session) return;
+  const res = await fetch(`/api/plaintext-view?session=${encodeURIComponent(state.session)}`);
+  const data = await res.json();
+  if (res.ok) renderPlaintextView(data.plaintext_view);
+}
+
+function updateBruteHint(stop) {
+  const el = $("brute-status");
+  if (!stop) {
+    el.textContent = "Optional — try after route → run";
+    return;
+  }
+  if (stop.status === "needs_information") {
+    el.textContent = "Recommended — loop needs more key / plaintext information";
+    el.classList.add("brute-warn");
+  } else if (stop.status === "complete") {
+    el.textContent = "Optional — verify or explore alternate keys";
+    el.classList.remove("brute-warn");
+  } else {
+    el.textContent = "Resolve stop status first, then brute if needed";
+    el.classList.remove("brute-warn");
+  }
+}
+
+async function runBruteForce() {
+  const ct = getCiphertext();
+  if (!ct) {
+    log("Brute: paste alphabetic ciphertext first");
+    return;
+  }
+  $("brute-status").textContent = "Running…";
+  setStatus("run", "BRUTING");
   try {
-    const payload = buildPayload();
-    const res = await fetch("/api/analyze", {
+    const res = await fetch("/api/brute-force", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        session: state.session,
+        classification: state.classification,
+        ciphertext: ct,
+        lane: $("brute-lane").value,
+        seed_length: Number($("brute-seed-length").value) || 3,
+        top_n: Number($("brute-top-n").value) || 8,
+        gak_seed_min: Number($("brute-gak-min").value) || 0,
+        gak_seed_max: Number($("brute-gak-max").value) || 500,
+      }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Analysis failed");
+    if (!res.ok) throw new Error(data.error || "Brute failed");
+    state.lastBrute = data;
+    renderBruteResults(data);
+    log(`Brute [${data.lane}]: ${data.count} candidate(s)`);
+    $("brute-status").textContent = `${data.lane} · ${data.count} hit(s)`;
+    setStatus("idle", "BRUTE OK");
+  } catch (err) {
+    log(`Brute error: ${err.message}`);
+    $("brute-status").textContent = "Error";
+    setStatus("err", "ERROR");
+  }
+}
 
-    state.session = data.session;
-    state.offset = 0;
-    state.lastConfig = data.config;
+function renderBruteResults(data) {
+  const notes = $("brute-notes");
+  const box = $("brute-results");
+  notes.textContent = data.notes || "";
+  box.innerHTML = "";
+  if (!data.candidates?.length) {
+    box.innerHTML = '<p class="classify-status">No survivors — widen range or add plaintext trial.</p>';
+    return;
+  }
+  data.candidates.forEach((c, idx) => {
+    const card = document.createElement("div");
+    card.className = "brute-card";
+    const preview = c.plaintext_preview || c.plaintext || "";
+    card.innerHTML = `
+      <div class="brute-card-head">
+        <span class="brute-label">${c.label}</span>
+        <span class="brute-score">${c.score != null ? `score ${c.score}` : c.detail || ""}</span>
+      </div>
+      ${preview ? `<pre class="brute-preview">${preview}</pre>` : ""}
+      <button type="button" class="btn btn-ghost brute-apply" data-idx="${idx}">Apply → re-run loop</button>
+    `;
+    card.querySelector(".brute-apply").addEventListener("click", () => applyBruteCandidate(idx));
+    box.appendChild(card);
+  });
+}
 
-    if (data.actionable_kinds) {
-      state.actionableKinds = new Set(data.actionable_kinds);
-    }
-
-    log(`Done: ${data.findings_count} findings, ${data.validated_count} validated, converged=${data.summary?.converged}`);
-    const stop = data.summary?.stop;
-    if (stop) {
-      log(`STOP: ${stop.headline}`);
-      (stop.suggestions || []).forEach((s) => log(`  → [${s.priority}] ${s.action}`));
-    }
-
-    // Populate kind / round filters from preview + summary
-    const kindSelect = $("filter-kind");
-    const roundSelect = $("filter-round");
-    const kinds = new Set();
-    (data.preview || []).forEach((r) => kinds.add(r.kind));
-    kindSelect.innerHTML = '<option value="">All kinds</option>';
-    [...kinds].sort().forEach((k) => {
-      const opt = document.createElement("option");
-      opt.value = k;
-      opt.textContent = k;
-      kindSelect.appendChild(opt);
+async function applyBruteCandidate(index) {
+  const c = state.lastBrute?.candidates?.[index];
+  if (!c) return;
+  if (state.routedIndex == null) {
+    log("Apply brute: route a hypothesis first");
+    return;
+  }
+  log(`Apply brute candidate: ${c.label}`);
+  setStatus("run", "RUNNING");
+  let pins = [];
+  try { pins = parsePins(); } catch { pins = []; }
+  const body = {
+    session: state.session,
+    classification: state.classification,
+    hypothesis_index: state.routedIndex,
+    ciphertext: getCiphertext(),
+    pins,
+    max_rounds: Number($("max-rounds").value) || 10,
+  };
+  if (c.hypothesis_patch) body.hypothesis_override = c.hypothesis_patch;
+  if (c.plaintext) body.plaintext_trial = c.plaintext;
+  try {
+    const res = await fetch("/api/route-run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
-
-    roundSelect.innerHTML = '<option value="">All rounds</option>';
-    (data.summary?.rounds || []).forEach((r) => {
-      const opt = document.createElement("option");
-      opt.value = String(r.round);
-      opt.textContent = `Round ${r.round}`;
-      roundSelect.appendChild(opt);
-    });
-
-    renderSummary(data);
-    await fetchFindings();
-    if (!data.summary?.stop) setStatus("ok", "READY");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Re-run failed");
+    await handleRunResponse(data);
   } catch (err) {
     log(`ERROR: ${err.message}`);
     setStatus("err", "ERROR");
   }
 }
 
-async function loadSources() {
-  const res = await fetch("/api/sources");
-  const data = await res.json();
-  state.sources = data;
-
-  const presetSelect = $("preset-slug");
-  presetSelect.innerHTML = "";
-  (data.presets || []).forEach((p) => {
-    const opt = document.createElement("option");
-    opt.value = p.slug;
-    opt.textContent = `${p.slug} (${p.propagator})`;
-    presetSelect.appendChild(opt);
-  });
-
-  const fpSelect = $("fp-slug");
-  fpSelect.innerHTML = "";
-  (data.fingerprinted || []).forEach((p) => {
-    const opt = document.createElement("option");
-    opt.value = p.slug;
-    opt.textContent = `${p.slug} · ${p.propagator}`;
-    fpSelect.appendChild(opt);
-  });
-
-  log(`Loaded ${data.presets?.length || 0} presets, ${data.fingerprinted?.length || 0} fingerprinted datasets.`);
+function canRouteRun(h) {
+  if (!h) return false;
+  if (h.propagator && h.propagator !== "none") return true;
+  if (h.dash_mode === "noita") return true;
+  if (h.dash_mode === "fingerprinted" && h.dataset_slug) return true;
+  return false;
 }
 
-function getClassifyInput() {
-  const mode = $("source-mode").value;
-  if (mode === "noita") {
-    return { source: "noita" };
+async function routeAndRun(hypothesisIndex) {
+  if (!state.classification?.hypotheses?.[hypothesisIndex]) {
+    log("Route → run: classify first");
+    return;
   }
-  const ct = $("ciphertext")?.value?.trim() || "";
-  if (ct) return { ciphertext: ct };
-  return null;
+
+  const h = state.classification.hypotheses[hypothesisIndex];
+  if (!canRouteRun(h)) {
+    log(`Route skipped: ${h.label} has no constraint propagator (decode or corpus tool only)`);
+    return;
+  }
+
+  setStatus("run", "RUNNING");
+  log(`Route → run: ${h.label}`);
+
+  let pins = [];
+  try { pins = parsePins(); } catch (err) {
+    log(`ERROR: invalid crib pins JSON — ${err.message}`);
+    setStatus("err", "ERROR");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/route-run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session: state.session,
+        classification: state.classification,
+        hypothesis_index: hypothesisIndex,
+        ciphertext: getCiphertext(),
+        pins,
+        max_rounds: Number($("max-rounds").value) || 10,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Route → run failed");
+    await handleRunResponse(data);
+  } catch (err) {
+    log(`ERROR: ${err.message}`);
+    setStatus("err", "ERROR");
+  }
 }
 
 function renderClassification(data) {
@@ -460,8 +607,9 @@ function renderClassification(data) {
 
   if (!data || !data.hypotheses?.length) {
     profileEl.innerHTML = "";
-    hypsEl.innerHTML = '<p class="classify-status">No hypotheses — add ciphertext or choose Noita.</p>';
+    hypsEl.innerHTML = '<p class="classify-status">No hypotheses — paste ciphertext and identify.</p>';
     statusEl.textContent = "No signal";
+    resetInferred();
     return;
   }
 
@@ -471,137 +619,102 @@ function renderClassification(data) {
   if (p.index_of_coincidence != null) chips.push(`IC: ${p.index_of_coincidence}`);
   if (p.shannon_entropy_bits != null) chips.push(`H: ${p.shannon_entropy_bits}`);
   if (p.ic_band) chips.push(`band: ${p.ic_band}`);
-  if (p.deck_size) chips.push(`deck: ${p.deck_size}`);
+  if (p.deck_size) chips.push(`deck hint: ${p.deck_size}`);
   if (p.num_messages) chips.push(`msgs: ${p.num_messages}`);
   if (p.kasiski_periods?.length) chips.push(`kasiski: ${p.kasiski_periods.join(",")}`);
 
   profileEl.innerHTML = chips.map((c) => `<span class="classify-chip">${c}</span>`).join("");
-  statusEl.textContent = data.top ? `Top: ${data.top.label} (${Math.round(data.top.confidence * 100)}%)` : "Classified";
+  statusEl.textContent = data.top
+    ? `${data.hypotheses.length} hypotheses · top: ${data.top.label} (${Math.round(data.top.confidence * 100)}%)`
+    : "Classified";
 
   hypsEl.innerHTML = "";
   data.hypotheses.forEach((h, idx) => {
     const card = document.createElement("div");
-    card.className = `hyp-card${idx === 0 ? " top" : ""}`;
+    const isRouted = state.routedIndex === idx;
+    card.className = `hyp-card${idx === 0 ? " top" : ""}${isRouted ? " routed" : ""}`;
     const reasons = (h.reasoning || []).map((r) => `<li>${r}</li>`).join("");
     const actions = (h.actions || []).map((a) => `<li>${a}</li>`).join("");
+    const prop = h.dash_propagator || h.propagator;
+    const meta = [
+      prop && prop !== "none" ? `prop: ${prop.replace(/_/g, " ")}` : "prop: —",
+      h.deck_size ? `deck: ${h.deck_size}` : "deck: unknown",
+      h.dash_mode && h.dash_mode !== "custom" ? `mode: ${h.dash_mode}` : null,
+    ].filter(Boolean).join(" · ");
+
+    let btnHtml = "";
+    if (canRouteRun(h)) {
+      btnHtml = `<button type="button" class="btn btn-primary hyp-route" data-idx="${idx}">Route → run</button>`;
+    } else {
+      btnHtml = `<span class="hyp-no-run">No propagator — manual decode / corpus only</span>`;
+    }
+
     card.innerHTML = `
       <div class="hyp-card-header">
         <span class="hyp-label">${h.label}</span>
         <span class="hyp-conf">${Math.round(h.confidence * 100)}%</span>
       </div>
+      <p class="hyp-meta">${meta}</p>
       <ul class="hyp-reason">${reasons}</ul>
       <ul class="hyp-actions">${actions}</ul>
-      ${h.propagator && h.propagator !== "none" ? `<button type="button" class="btn btn-ghost hyp-apply" data-idx="${idx}">Apply route → run</button>` : `<button type="button" class="btn btn-ghost hyp-apply" data-idx="${idx}">Apply route</button>`}
+      ${btnHtml}
     `;
-    card.querySelector(".hyp-apply").addEventListener("click", () => applyHypothesis(idx));
+    const btn = card.querySelector(".hyp-route");
+    if (btn) btn.addEventListener("click", () => routeAndRun(idx));
     hypsEl.appendChild(card);
   });
 }
 
-function applyHypothesis(index) {
-  const data = state.classification;
-  if (!data?.hypotheses?.[index]) return;
-  const h = data.hypotheses[index];
-
-  if (h.dash_mode === "noita") {
-    $("source-mode").value = "noita";
-    showSourcePanel("noita");
-    log(`Route: Noita eyes (${h.label})`);
-    runAnalysis();
-    return;
-  }
-
-  if (h.dash_mode === "fingerprinted" && h.dataset_slug) {
-    $("source-mode").value = "fingerprinted";
-    showSourcePanel("fingerprinted");
-    $("fp-slug").value = h.dataset_slug;
-    log(`Route: fingerprinted ${h.dataset_slug}`);
-    if (h.propagator && h.propagator !== "none") runAnalysis();
-    return;
-  }
-
-  $("source-mode").value = "custom";
-  showSourcePanel("custom");
-  if (h.dash_propagator || (h.propagator && h.propagator !== "none")) {
-    $("propagator").value = h.dash_propagator || h.propagator;
-    updatePropagatorFields();
-  }
-  if (h.deck_size) $("deck-size").value = String(h.deck_size);
-  const hyp = h.hypothesis || {};
-  if (hyp.seed_length) $("seed-length").value = String(hyp.seed_length);
-  if (hyp.seed) $("seed").value = hyp.seed;
-  if (hyp.extension) $("extension").value = hyp.extension;
-  if (hyp.mode) $("gak-mode").value = hyp.mode;
-  log(`Route: custom ${h.label}`);
-  if (h.propagator && h.propagator !== "none") runAnalysis();
-}
-
 async function runClassification() {
-  const input = getClassifyInput();
-  if (!input) {
-    log("Classification: paste ciphertext or select Noita eyes");
+  const ct = getCiphertext();
+  if (!ct) {
+    log("Identify: paste ciphertext in Source first");
+    $("classify-status").textContent = "Ciphertext required";
     return;
   }
+
+  resetInferred();
   $("classify-status").textContent = "Classifying…";
+  setStatus("run", "SCANNING");
+
   try {
-    let body = input;
-    if (input.source === "noita") {
-      body = { source: "noita" };
-    }
     const res = await fetch("/api/classify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ciphertext: ct }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Classify failed");
     renderClassification(data);
     log(`Classification: ${data.top?.label || "done"} (${data.hypotheses?.length || 0} hypotheses)`);
+    log("Pick a hypothesis in Classification and click Route → run.");
+    setStatus("idle", "IDENTIFIED");
   } catch (err) {
     $("classify-status").textContent = "Error";
     log(`Classification error: ${err.message}`);
+    setStatus("err", "ERROR");
   }
 }
 
-function loadAutokeySample() {
-  $("source-mode").value = "custom";
-  showSourcePanel("custom");
-  $("propagator").value = "stream_extension";
-  updatePropagatorFields();
-  $("ciphertext").value = "Dlc jbmse jtyxe tkk oijym akwf olv ehdj dne.";
-  $("plaintext").value = "The quick brown fox jumps over the lazy dog.";
-  $("seed").value = "KEY";
-  $("seed-length").value = "3";
-  log("Loaded autokey-standard-01 sample ciphertext.");
-  runClassification();
-}
-
 function bindEvents() {
-  $("source-mode").addEventListener("change", (e) => {
-    const mode = e.target.value;
-    if (mode === "noita") showSourcePanel("noita");
-    else showSourcePanel(mode);
+  $("classify-btn").addEventListener("click", runClassification);
+
+  $("ciphertext").addEventListener("input", () => {
+    if (state.classification) {
+      state.classification = null;
+      state.routedIndex = null;
+      resetInferred();
+      $("classify-profile").innerHTML = "";
+      $("classify-hypotheses").innerHTML = "";
+      $("classify-status").textContent = "Ciphertext changed — identify again";
+    }
   });
 
-  $("propagator").addEventListener("change", updatePropagatorFields);
-  $("run-btn").addEventListener("click", runAnalysis);
-  $("classify-btn").addEventListener("click", runClassification);
-  $("load-sample-btn").addEventListener("click", loadAutokeySample);
   $("apply-crib-btn").addEventListener("click", () => {
     applyCribFromSelected(true).catch((e) => log(`Crib error: ${e.message}`));
   });
   $("crib-anchor-pt").addEventListener("change", () => {
     if (state.selectedFinding) showFindingDetail(state.selectedFinding);
-  });
-
-  let classifyTimer;
-  $("ciphertext")?.addEventListener("input", () => {
-    clearTimeout(classifyTimer);
-    classifyTimer = setTimeout(() => {
-      if ($("source-mode").value === "custom" && $("ciphertext").value.trim().length >= 8) {
-        runClassification();
-      }
-    }, 600);
   });
 
   ["filter-kind", "filter-confidence", "filter-round"].forEach((id) => {
@@ -629,13 +742,13 @@ function bindEvents() {
     state.offset += state.limit;
     fetchFindings().catch((e) => log(e.message));
   });
+
+  $("brute-run-btn").addEventListener("click", runBruteForce);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   bindEvents();
-  updatePropagatorFields();
-  showSourcePanel("preset");
-  await loadSources();
+  resetInferred();
   setStatus("idle", "IDLE");
-  log("Constraints Dash ready. Click a finding (↳ = crib-eligible); double-click to apply crib pins.");
+  log("Constraints Dash ready. Paste ciphertext → Identify → Route → run in Classification.");
 });
