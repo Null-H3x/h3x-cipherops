@@ -121,6 +121,65 @@ def gronsfeld_decrypt(text: str, numeric_key: str) -> str:
     return "".join(out)
 
 
+def nihilist(text: str, numeric_key: str, *, polybius_key: str = "NIHILIST") -> str:
+    """
+    Nihilist cipher: Polybius coordinates + numeric key addition mod 10 per digit.
+    """
+    if not numeric_key or not numeric_key.isdigit():
+        raise ValueError("Nihilist key must be numeric")
+    from cipherops.ciphers.utils import build_polybius_square, polybius_coords
+
+    square = build_polybius_square(polybius_key, size=5)
+    digits: list[str] = []
+    ki = 0
+    for ch in text:
+        if ch.isalpha():
+            r, c = polybius_coords(square, ch)
+            d1, d2 = r + 1, c + 1
+            k1 = int(numeric_key[ki % len(numeric_key)])
+            k2 = int(numeric_key[(ki + 1) % len(numeric_key)])
+            digits.append(str((d1 + k1) % 10))
+            digits.append(str((d2 + k2) % 10))
+            ki += 2
+        else:
+            digits.append(ch)
+    return "".join(digits)
+
+
+def nihilist_decrypt(text: str, numeric_key: str, *, polybius_key: str = "NIHILIST") -> str:
+    if not numeric_key or not numeric_key.isdigit():
+        raise ValueError("Nihilist key must be numeric")
+    from cipherops.ciphers.utils import build_polybius_square
+
+    square = build_polybius_square(polybius_key, size=5)
+    digits = "".join(ch for ch in text if ch.isdigit())
+    ki = 0
+    letters: list[str] = []
+    for i in range(0, len(digits), 2):
+        d1 = int(digits[i])
+        d2 = int(digits[i + 1])
+        k1 = int(numeric_key[ki % len(numeric_key)])
+        k2 = int(numeric_key[(ki + 1) % len(numeric_key)])
+        r = (d1 - k1) % 10
+        c = (d2 - k2) % 10
+        if not 1 <= r <= 5 or not 1 <= c <= 5:
+            raise ValueError(f"Invalid Polybius coordinates after decrypt: {r},{c}")
+        letters.append(square[r - 1][c - 1])
+        ki += 2
+    out: list[str] = []
+    li = 0
+    di = 0
+    for ch in text:
+        if ch.isdigit():
+            if di % 2 == 0:
+                out.append(letters[li])
+                li += 1
+            di += 1
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
 def autokey(text: str, key: str, *, variant: str = "standard") -> str:
     """
     Autokey cipher variants:

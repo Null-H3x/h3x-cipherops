@@ -8,10 +8,10 @@ Cross-reference of **what this repo implements** vs **what classical/modern taxo
 
 | Layer | Count | Status |
 |-------|-------|--------|
-| Solved cipher variants (registry) | 48 | Implemented + dataset + math doc |
+| Solved cipher variants (registry) | 53 | Implemented + dataset + math doc |
 | Unsolved corpora | 1 (9 messages) | Noita eye |
-| Ciphertext property profiles | 479 | Analyzer v1.2.0 |
-| Math formula docs | 47 | One per implemented family |
+| Ciphertext property profiles | 539 | Analyzer v1.2.0 |
+| Math formula docs | 53 | One per implemented variant |
 | `cipher-families.md` entries | ~35 named | ~12 not implemented |
 | Extended taxonomy (81-type ref.) | ~81 | ~50+ not implemented |
 | Executable cryptanalysis solvers | 0 | Metadata + stats only |
@@ -58,24 +58,33 @@ These have `cipherops` implementation, fingerprinted dataset, math doc, ground t
 
 ---
 
-## Tier P1 — Named in repo taxonomy, not implemented
+## Tier P1 — Recently implemented (v1.3.0)
+
+| Cipher | Slug | Type |
+|--------|------|------|
+| **Pigpen** | `pigpen-standard` | Symbol substitution |
+| **Scytale** | `scytale-d5` | Cylinder transposition (d=5) |
+| **Nihilist** | `nihilist-31415` | Polybius + numeric key |
+| **Hex (UTF-8)** | `hex-utf8` | Radix encoding |
+| **Manchester IEEE** | `manchester-ieee` | Line coding |
+
+---
+
+## Tier P1 — Still unimplemented
 
 Listed in [`../math-formulas/unimplemented-ciphers.md`](../math-formulas/unimplemented-ciphers.md) and [`../math-formulas/cipher-families.md`](../math-formulas/cipher-families.md) — **no** `CipherSpec` yet.
 
 | Cipher | Type | Why it matters | Suggested next step |
 |--------|------|----------------|---------------------|
 | **Copiale** | Homophonic symbols | Famous unsolved-style corpus; homophonic scoring gap | Reference corpus import (like Noita) |
-| **Pigpen** | Symbol substitution | Very common in puzzles / CTFs | Simple symbol map + dataset |
-| **Scytale** | Transposition | Historical baseline; cylinder period | Implement + link to columnar |
 | **VIC** | Compound (sub + transp) | High difficulty Soviet cipher | Math doc + staged impl |
-| **Nihilist** | Polybius + numeric key | Bridges Polybius and Gronsfeld | Extend `polybius` module |
 | **Grille** | Transposition | Physical constraint model | Optional (niche) |
 | **DRYAD** | Stream / XOR | Military historical | Lower priority vs modern XOR |
 | **M-94** | Cylinder | US WWII device | Similar to Scytale |
 | **Wahlwort** | Codeword | Word-level substitution | Nomenclator extension |
-| **Generic transposition** | Permutation | Umbrella category | Covered partially by rail/columnar |
+| **Generic transposition** | Permutation | Umbrella category | Covered partially by rail/columnar/scytale |
 
-**Priority recommendation:** Pigpen, Scytale, Nihilist (high puzzle frequency, moderate effort). Copiale/VIC as corpus or multi-stage projects.
+**Priority recommendation:** Copiale/VIC as corpus or multi-stage projects; Base32/Base58 for encoding tier.
 
 ---
 
@@ -83,8 +92,8 @@ Listed in [`../math-formulas/unimplemented-ciphers.md`](../math-formulas/unimple
 
 | Scheme | Status | Doc |
 |--------|--------|-----|
-| Base64, Baconian, **PAM-5 dibit** | Implemented | [`encodings-catalog.md`](../math-formulas/encodings-catalog.md) |
-| 4D-PAM5, NRZ, Manchester, 8b/10b, Base32/58, Hex | Reference only | same |
+| Base64, Baconian, **PAM-5 dibit**, **Hex**, **Manchester IEEE** | Implemented | [`encodings-catalog.md`](../math-formulas/encodings-catalog.md) |
+| 4D-PAM5, NRZ, 8b/10b, Base32/58 | Reference only | same |
 
 ## Tier P2 — Extended taxonomy gaps (81-type reference)
 
@@ -92,7 +101,7 @@ From [@systemslibrarian/cipher-detective-ai](https://github.com/systemslibrarian
 
 | Category | Examples not implemented |
 |----------|-------------------------|
-| Symbol / visual | Pigpen, Masonic variants, dancing men, tic-tac-toe |
+| Symbol / visual | Masonic variants, dancing men, tic-tac-toe |
 | Historical compound | VIC, Great cipher, Bazeries, Jefferson disk |
 | Book / nomenclator | Book cipher (full), Alberti disk |
 | Modern classical | Enigma (rotor), Purple, SIGABA |
@@ -148,7 +157,7 @@ These are **documented as out-of-scope** unless a specific corpus or training ne
 1. **No executable solvers** — profiles describe attacks; nothing runs MIC, crib-drag, or book search.
 2. **Classifier missing** — cannot route ciphertext to correct family automatically.
 3. **Homophonic / Copiale** — taxonomy named, no implementation or unsolved corpus beyond references.
-4. **12+ classical ciphers in `cipher-families.md`** — no code path (Pigpen, Scytale, VIC, …).
+4. **9+ classical ciphers in `cipher-families.md`** — no code path (VIC, Copiale, …).
 5. **Fractionated Morse decrypt lossy** — documented but limits roundtrip training on punctuation.
 
 ### Still open — medium impact
@@ -172,7 +181,7 @@ These are **documented as out-of-scope** unless a specific corpus or training ne
 ```
 1. classify.py heuristics (IC + period + symbol class → family hypothesis)
 2. MIC implementation for periodic polyalphabetic only
-3. Pigpen + Scytale implementations (P1 quick wins)
+3. Base32 / Base58 encodings (P1b quick wins)
 4. Book corpus hook for running-key attack tooling
 5. Isomorphs.py (NBiermann) for historical / Wheatstone-class
 6. Copiale or homophonic corpus import

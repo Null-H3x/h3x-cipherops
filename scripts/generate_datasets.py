@@ -27,6 +27,8 @@ def _normalize_for_compare(text: str, family: str) -> str:
         return "".join(ch for ch in text.upper() if ch.isalnum() or ch in "AB")
     if family == "polybius":
         return "".join(ch for ch in text if ch.isdigit())
+    if family in {"pigpen", "nihilist", "scytale"}:
+        return clean_alpha(text).upper().replace("J", "I").rstrip("X")
     return text
 
 

@@ -20,7 +20,7 @@ from cipherops.analysis.fingerprint import (
 )
 from cipherops.analysis.kasiski import kasiski_examination
 from cipherops.analysis.keyspace import estimate_keyspace
-from cipherops.ciphers import classical, encoding
+from cipherops.ciphers import classical, encoding, symbolic, transposition
 from cipherops.ciphers.registry import CIPHER_REGISTRY, PLAIN_SAMPLES, get_cipher
 from cipherops.ciphers.utils import mod_inverse
 from scripts.generate_datasets import _roundtrip_ok
@@ -82,6 +82,18 @@ def audit_classical_kats(report: AuditReport) -> None:
         ("base64 roundtrip", encoding.base64_decode(encoding.base64_encode("Test123")) == "Test123"),
         ("pam5 Hello", encoding.pam5_decode(encoding.pam5_encode("Hello")) == "Hello"),
         ("pam5 roundtrip unicode", encoding.pam5_decode(encoding.pam5_encode("Cryptography π")) == "Cryptography π"),
+        ("hex Hello", encoding.hex_encode("Hello") == "48656C6C6F"),
+        ("hex roundtrip", encoding.hex_decode(encoding.hex_encode("Test123")) == "Test123"),
+        ("manchester roundtrip", encoding.manchester_decode(encoding.manchester_encode("Hi")) == "Hi"),
+        ("pigpen HELLO", symbolic.pigpen_decode(symbolic.pigpen_encode("HELLO")) == "HELLO"),
+        (
+            "scytale WEAREDISCOVERED d=3",
+            transposition.scytale_decrypt(transposition.scytale("WEAREDISCOVERED", 3), 3) == "WEAREDISCOVERED",
+        ),
+        (
+            "nihilist roundtrip",
+            classical.nihilist_decrypt(classical.nihilist("HELLO", "31415"), "31415") == "HELLO",
+        ),
     ]
     for label, ok in checks:
         if ok:

@@ -58,3 +58,40 @@ def columnar_transposition(text: str, key: str) -> str:
 
 def columnar_transposition_decrypt(text: str, key: str) -> str:
     return columnar_write(text, key)
+
+
+def scytale(text: str, diameter: int) -> str:
+    """
+    Scytale (skytale) cylinder transposition.
+
+    Write plaintext in rows of width `diameter`, read down columns (around the staff).
+    """
+    if diameter < 2:
+        raise ValueError("Scytale diameter must be >= 2")
+    alpha = clean_alpha(text)
+    if not alpha:
+        return ""
+    cols = (len(alpha) + diameter - 1) // diameter
+    padded = alpha + "X" * (cols * diameter - len(alpha))
+    matrix = [padded[r * cols : (r + 1) * cols] for r in range(diameter)]
+    return "".join(matrix[r][c] for c in range(cols) for r in range(diameter))
+
+
+def scytale_decrypt(text: str, diameter: int) -> str:
+    """Reverse scytale: write column-wise, read row-wise."""
+    if diameter < 2:
+        return text
+    alpha = clean_alpha(text)
+    if not alpha:
+        return ""
+    cols = len(alpha) // diameter
+    if cols * diameter != len(alpha):
+        raise ValueError("Ciphertext length must be divisible by diameter")
+    matrix = [[""] * cols for _ in range(diameter)]
+    idx = 0
+    for c in range(cols):
+        for r in range(diameter):
+            matrix[r][c] = alpha[idx]
+            idx += 1
+    rows = "".join("".join(row) for row in matrix)
+    return rows.rstrip("X")

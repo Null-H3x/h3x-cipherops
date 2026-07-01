@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from cipherops.ciphers import classical, encoding, fractionated, modern, polygraphic, transposition
+from cipherops.ciphers import classical, encoding, fractionated, modern, polygraphic, symbolic, transposition
 
 
 @dataclass(frozen=True)
@@ -100,6 +100,8 @@ def _registry() -> list[CipherSpec]:
         CipherSpec("caesar", "caesar-rot3", lambda t: classical.caesar(t, 3), lambda t: classical.caesar(t, -3), {"shift": 3}, "docs/math-formulas/caesar.md", 1),
         CipherSpec("affine", "affine-a2b5", lambda t: classical.affine(t, 5, 8), lambda t: classical.affine_decrypt(t, 5, 8), {"a": 5, "b": 8}, "docs/math-formulas/affine.md", 3),
         CipherSpec("railfence", "railfence-3", lambda t: transposition.rail_fence(t, 3), lambda t: transposition.rail_fence_decrypt(t, 3), {"rails": 3}, "docs/math-formulas/railfence.md", 2),
+        CipherSpec("scytale", "scytale-d5", lambda t: transposition.scytale(t, 5), lambda t: transposition.scytale_decrypt(t, 5), {"diameter": 5}, "docs/math-formulas/scytale.md", 2),
+        CipherSpec("pigpen", "pigpen-standard", symbolic.pigpen_encode, symbolic.pigpen_decode, {"chart": "standard-unicode"}, "docs/math-formulas/pigpen.md", 2),
         CipherSpec("baconian", "baconian-ab", classical.baconian_encode, classical.baconian_decode, {"a_char": "A", "b_char": "B"}, "docs/math-formulas/baconian.md", 2),
         CipherSpec("polybius", "polybius-square", lambda t: classical.polybius_square(t, "CRYPTO"), lambda t: classical.polybius_square_decrypt(t, "CRYPTO"), {"key": "CRYPTO"}, "docs/math-formulas/polybius.md", 2),
         CipherSpec("substitution", "substitution-qwerty", lambda t: classical.simple_substitution(t, DEFAULT_SUBSTITUTION), lambda t: classical.simple_substitution_decrypt(t, DEFAULT_SUBSTITUTION), {"mapping": DEFAULT_SUBSTITUTION}, "docs/math-formulas/substitution.md", 3),
@@ -112,6 +114,7 @@ def _registry() -> list[CipherSpec]:
         CipherSpec("running_key", "running-key-book", lambda t: classical.running_key(t, RUNNING_KEY_TEXT), lambda t: classical.running_key_decrypt(t, RUNNING_KEY_TEXT), {"key_source": "book-excerpt"}, "docs/math-formulas/running-key.md", 4),
         CipherSpec("vigenere", "vigenere-keyword", lambda t: classical.vigenere(t, "KEY"), lambda t: classical.vigenere_decrypt(t, "KEY"), {"key": "KEY"}, "docs/math-formulas/vigenere.md", 3),
         CipherSpec("gronsfeld", "gronsfeld-31415", lambda t: classical.gronsfeld(t, "31415"), lambda t: classical.gronsfeld_decrypt(t, "31415"), {"numeric_key": "31415"}, "docs/math-formulas/gronsfeld.md", 3),
+        CipherSpec("nihilist", "nihilist-31415", lambda t: classical.nihilist(t, "31415"), lambda t: classical.nihilist_decrypt(t, "31415"), {"numeric_key": "31415", "polybius_key": "NIHILIST"}, "docs/math-formulas/nihilist.md", 4),
         CipherSpec("homophonic", "homophonic-basic", lambda t: classical.homophonic_substitution(t, DEFAULT_HOMOPHONIC), lambda t: classical.homophonic_substitution_decrypt(t, HOMOPHONIC_INVERSE), {"mapping": "basic-english"}, "docs/math-formulas/homophonic.md", 4),
         CipherSpec("four_square", "four-square-keys", lambda t: polygraphic.four_square(t, "KEYONE", "KEYTWO"), lambda t: polygraphic.four_square(t, "KEYONE", "KEYTWO", decrypt=True), {"key1": "KEYONE", "key2": "KEYTWO"}, "docs/math-formulas/four-square.md", 4),
         CipherSpec("hill", "hill-2x2", lambda t: polygraphic.hill(t, [[3, 3], [2, 5]]), lambda t: polygraphic.hill(t, [[3, 3], [2, 5]], decrypt=True), {"matrix": [[3, 3], [2, 5]]}, "docs/math-formulas/hill.md", 4),
@@ -123,6 +126,8 @@ def _registry() -> list[CipherSpec]:
         CipherSpec("trifid", "trifid-keyword", lambda t: fractionated.trifid(t, "KEYWORD"), lambda t: fractionated.trifid_decrypt(t, "KEYWORD"), {"key": "KEYWORD"}, "docs/math-formulas/trifid.md", 5),
         CipherSpec("base64", "b64", encoding.base64_encode, encoding.base64_decode, {}, "docs/math-formulas/base64.md", 1),
         CipherSpec("pam5", "pam5-dibit", encoding.pam5_encode, encoding.pam5_decode, {"mapping": "dibit", "levels": 5}, "docs/math-formulas/pam5.md", 2),
+        CipherSpec("hex", "hex-utf8", encoding.hex_encode, encoding.hex_decode, {}, "docs/math-formulas/hex.md", 1),
+        CipherSpec("manchester", "manchester-ieee", encoding.manchester_encode, encoding.manchester_decode, {"standard": "IEEE802.3"}, "docs/math-formulas/manchester.md", 2),
         CipherSpec("fractionated_morse", "fractionated-morse", lambda t: fractionated.fractionated_morse(t, "CIPHER"), lambda t: fractionated.fractionated_morse_decrypt(t, "CIPHER"), {"substitution_key": "CIPHER"}, "docs/math-formulas/fractionated-morse.md", 5, encrypt_only=True),
         # Modern symmetric / AEAD
         CipherSpec("aes_gcm", "aes-128-gcm", modern.aes_128_gcm_encrypt, modern.aes_128_gcm_decrypt, {"key_bits": 128, "mode": "GCM"}, "docs/math-formulas/aes-gcm.md", 6, era="modern"),

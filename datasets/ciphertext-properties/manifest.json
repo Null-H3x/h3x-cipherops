@@ -35,6 +35,20 @@
     "source_path": "datasets/fingerprinted/railfence-3/data.jsonl"
   },
   {
+    "slug": "scytale-d5",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/scytale-d5/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/scytale-d5/data.jsonl"
+  },
+  {
+    "slug": "pigpen-standard",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/pigpen-standard/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/pigpen-standard/data.jsonl"
+  },
+  {
     "slug": "baconian-ab",
     "count": 10,
     "path": "datasets/ciphertext-properties/baconian-ab/properties.jsonl",
@@ -119,6 +133,13 @@
     "source_path": "datasets/fingerprinted/gronsfeld-31415/data.jsonl"
   },
   {
+    "slug": "nihilist-31415",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/nihilist-31415/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/nihilist-31415/data.jsonl"
+  },
+  {
     "slug": "homophonic-basic",
     "count": 10,
     "path": "datasets/ciphertext-properties/homophonic-basic/properties.jsonl",
@@ -194,6 +215,20 @@
     "path": "datasets/ciphertext-properties/pam5-dibit/properties.jsonl",
     "corpus_type": "fingerprinted",
     "source_path": "datasets/fingerprinted/pam5-dibit/data.jsonl"
+  },
+  {
+    "slug": "hex-utf8",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/hex-utf8/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/hex-utf8/data.jsonl"
+  },
+  {
+    "slug": "manchester-ieee",
+    "count": 10,
+    "path": "datasets/ciphertext-properties/manchester-ieee/properties.jsonl",
+    "corpus_type": "fingerprinted",
+    "source_path": "datasets/fingerprinted/manchester-ieee/data.jsonl"
   },
   {
     "slug": "fractionated-morse",

@@ -99,8 +99,19 @@ def estimate_keyspace(cipher_family: str, *, params: dict | None = None) -> dict
     if family in {"adfgx", "adfgvx", "bifid", "trifid", "straddle_checkerboard", "fractionated_morse"}:
         return {"exact": None, "formula": "compound (polybius × transposition)", "log2": None, "label": "compound stages"}
 
-    if family in {"base64", "baconian", "pam5"}:
+    if family in {"base64", "baconian", "pam5", "hex", "manchester"}:
         return {"exact": 1, "formula": "encoding", "log2": 0.0, "label": "1 (decode)"}
+
+    if family == "pigpen":
+        return {"exact": 1, "formula": "fixed chart", "log2": 0.0, "label": "1 (fixed chart)"}
+
+    if family == "scytale":
+        d = params.get("diameter", 5)
+        return {"exact": None, "formula": f"diameter d={d}", "log2": None, "label": f"d={d} staff"}
+
+    if family == "nihilist":
+        m = len(str(params.get("numeric_key", "31415")))
+        return {"exact": 10**m, "formula": f"10^{m} × Polybius", "log2": m * math.log2(10), "label": f"10^{m}"}
 
     if family == "noita_eye":
         deck = params.get("deck_size", 83)

@@ -69,3 +69,53 @@ def pam5_decode(symbols: str) -> str:
         raise ValueError("PAM-5 payload too short for length prefix")
     length = struct.unpack(">I", payload[:4])[0]
     return payload[4 : 4 + length].decode("utf-8")
+
+
+def hex_encode(text: str) -> str:
+    """UTF-8 text → uppercase hexadecimal (two nybbles per byte)."""
+    return text.encode("utf-8").hex().upper()
+
+
+def hex_decode(text: str) -> str:
+    """Hexadecimal string → UTF-8 text."""
+    cleaned = "".join(ch for ch in text if ch in "0123456789abcdefABCDEF")
+    if len(cleaned) % 2:
+        raise ValueError("Hex string must have even length")
+    return bytes.fromhex(cleaned).decode("utf-8")
+
+
+def manchester_encode(text: str) -> str:
+    """
+    IEEE 802.3-style Manchester: 0 → 01, 1 → 10 (per bit).
+
+    Length-prefixed UTF-8 payload like PAM-5 for reliable roundtrip.
+    """
+    data = text.encode("utf-8")
+    payload = struct.pack(">I", len(data)) + data
+    bits = _bytes_to_bitstring(payload)
+    mapping = {"0": "01", "1": "10"}
+    return "".join(mapping[b] for b in bits)
+
+
+def manchester_decode(symbols: str) -> str:
+    """Decode Manchester bit pairs back to UTF-8 text."""
+    cleaned = "".join(ch for ch in symbols if ch in "01")
+    if len(cleaned) % 2:
+        raise ValueError("Manchester bitstream length must be even")
+    bits: list[str] = []
+    for i in range(0, len(cleaned), 2):
+        pair = cleaned[i : i + 2]
+        if pair == "01":
+            bits.append("0")
+        elif pair == "10":
+            bits.append("1")
+        else:
+            raise ValueError(f"Invalid Manchester pair: {pair}")
+    bitstr = "".join(bits)
+    if len(bitstr) % 8:
+        bitstr = bitstr[: len(bitstr) - (len(bitstr) % 8)]
+    payload = _bitstring_to_bytes(bitstr)
+    if len(payload) < 4:
+        raise ValueError("Manchester payload too short for length prefix")
+    length = struct.unpack(">I", payload[:4])[0]
+    return payload[4 : 4 + length].decode("utf-8")

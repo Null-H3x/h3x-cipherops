@@ -25,6 +25,16 @@
     "path": "/workspace/datasets/fingerprinted/railfence-3/data.jsonl"
   },
   {
+    "slug": "scytale-d5",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/scytale-d5/data.jsonl"
+  },
+  {
+    "slug": "pigpen-standard",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/pigpen-standard/data.jsonl"
+  },
+  {
     "slug": "baconian-ab",
     "count": 10,
     "path": "/workspace/datasets/fingerprinted/baconian-ab/data.jsonl"
@@ -85,6 +95,11 @@
     "path": "/workspace/datasets/fingerprinted/gronsfeld-31415/data.jsonl"
   },
   {
+    "slug": "nihilist-31415",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/nihilist-31415/data.jsonl"
+  },
+  {
     "slug": "homophonic-basic",
     "count": 10,
     "path": "/workspace/datasets/fingerprinted/homophonic-basic/data.jsonl"
@@ -138,6 +153,16 @@
     "slug": "pam5-dibit",
     "count": 10,
     "path": "/workspace/datasets/fingerprinted/pam5-dibit/data.jsonl"
+  },
+  {
+    "slug": "hex-utf8",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/hex-utf8/data.jsonl"
+  },
+  {
+    "slug": "manchester-ieee",
+    "count": 10,
+    "path": "/workspace/datasets/fingerprinted/manchester-ieee/data.jsonl"
   },
   {
     "slug": "fractionated-morse",

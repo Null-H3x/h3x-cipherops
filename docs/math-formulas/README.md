@@ -20,6 +20,8 @@ Mathematical definitions, variables, and validated Python implementations for cl
 | Caesar / ROT13 | `caesar.md` | `caesar-rot3`, `caesar-rot13` |
 | Affine | `affine.md` | `affine-a2b5` |
 | Rail Fence | `railfence.md` | `railfence-3` |
+| Scytale | `scytale.md` | `scytale-d5` |
+| Pigpen | `pigpen.md` | `pigpen-standard` |
 | Baconian | `baconian.md` | `baconian-ab` |
 | Polybius Square | `polybius.md` | `polybius-square` |
 | Simple Substitution | `substitution.md` | `substitution-qwerty` |
@@ -31,6 +33,7 @@ Mathematical definitions, variables, and validated Python implementations for cl
 | Running Key | `running-key.md` | `running-key-book` |
 | Vigenère | `vigenere.md` | `vigenere-keyword` |
 | Gronsfeld | `gronsfeld.md` | `gronsfeld-31415` |
+| Nihilist | `nihilist.md` | `nihilist-31415` |
 | Homophonic | `homophonic.md` | `homophonic-basic` |
 | Four-Square | `four-square.md` | `four-square-keys` |
 | Hill | `hill.md` | `hill-2x2` |
@@ -42,6 +45,8 @@ Mathematical definitions, variables, and validated Python implementations for cl
 | Trifid | `trifid.md` | `trifid-keyword` |
 | Base64 | `base64.md` | `b64` |
 | PAM-5 dibit | `pam5.md` | `pam5-dibit` |
+| Hex (UTF-8) | `hex.md` | `hex-utf8` |
+| Manchester IEEE | `manchester.md` | `manchester-ieee` |
 | Fractionated Morse | `fractionated-morse.md` | `fractionated-morse` |
 
 ## Modern Key Ciphers

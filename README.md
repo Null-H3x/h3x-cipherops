@@ -84,7 +84,7 @@ LLM-Cryptography/
 │   ├── fingerprint.py      # entropy, IC, Kasiski (re-exports analysis)
 │   └── cli.py              # click-based entrypoint (`fingerprint`, `analyze`)
 ├── datasets/
-│   ├── fingerprinted/          # Validated plaintext/ciphertext pairs (48 cipher variants)
+│   ├── fingerprinted/          # Validated plaintext/ciphertext pairs (53 cipher variants)
 │   ├── ciphertext-properties/  # Cryptanalytic metadata per ciphertext record
 │   └── unsolved/               # Real-world unsolved ciphertext corpora
 ├── docs/math-formulas/         # Math definitions linked to cipher implementations
@@ -111,12 +111,12 @@ LLM-Cryptography/
 
 | Corpus | Path | Records | Status |
 |--------|------|---------|--------|
-| Fingerprinted ciphers | `datasets/fingerprinted/*/data.jsonl` | 480 (48 × 10) | solved, roundtrip-verified |
-| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 489 | fingerprint, frequency, Kasiski, coset IC, n-grams, attack surface |
+| Fingerprinted ciphers | `datasets/fingerprinted/*/data.jsonl` | 530 (53 × 10) | solved, roundtrip-verified |
+| Ciphertext properties | `datasets/ciphertext-properties/*/properties.jsonl` | 539 | fingerprint, frequency, Kasiski, coset IC, n-grams, attack surface |
 | Noita eye messages | `datasets/unsolved/noita-eye-messages/data.jsonl` | 9 | unsolved (from [Eyes](https://github.com/Null-H3x/Eyes)) |
-| Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 49 | audited |
+| Ground truth registry | `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` | 54 (53 solved + 1 unsolved) | audited |
 
-Math docs for every cipher: `docs/math-formulas/`. **Encodings** (PAM-5, NRZ, Manchester): [`docs/math-formulas/encodings-catalog.md`](docs/math-formulas/encodings-catalog.md). **Unimplemented ciphers** (Pigpen, Scytale, Enigma, …): [`docs/math-formulas/unimplemented-ciphers.md`](docs/math-formulas/unimplemented-ciphers.md). Cryptanalysis reference: [`docs/cryptanalysis/`](docs/cryptanalysis/). Full variable inventory: [`docs/variable-inventory.md`](docs/variable-inventory.md).
+Math docs for every cipher: `docs/math-formulas/`. **Encodings** (PAM-5, Hex, Manchester, …): [`docs/math-formulas/encodings-catalog.md`](docs/math-formulas/encodings-catalog.md). **Unimplemented ciphers** (VIC, Enigma, …): [`docs/math-formulas/unimplemented-ciphers.md`](docs/math-formulas/unimplemented-ciphers.md). Cryptanalysis reference: [`docs/cryptanalysis/`](docs/cryptanalysis/). Full variable inventory: [`docs/variable-inventory.md`](docs/variable-inventory.md).
 
 Analyze a ciphertext from the CLI:
 

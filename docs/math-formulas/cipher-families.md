@@ -147,7 +147,7 @@
 
 ## Implemented in this repo (quick index)
 
-See [`README.md`](README.md) for the full 48-variant list with dataset slugs.
+See [`README.md`](README.md) for the full 53-variant list with dataset slugs.
 
 ---
 
@@ -170,12 +170,11 @@ Full encoding catalog: [`encodings-catalog.md`](encodings-catalog.md).
 
 | Cipher | Type | Priority | Catalog |
 |--------|------|----------|---------|
-| Pigpen | Symbol substitution | P1 | [`unimplemented-ciphers.md`](unimplemented-ciphers.md) |
-| Scytale | Cylinder transposition | P1 | same |
-| Nihilist | Polybius + numeric | P1 | same |
-| Copiale | Homophonic manuscript | Corpus | same |
+| Copiale | Homophonic manuscript | Corpus | [`unimplemented-ciphers.md`](unimplemented-ciphers.md) |
 | VIC | Soviet compound | P2 | same |
 | Enigma | Rotor machine | P2 | same |
 | Grille, M-94, DRYAD, Wahlwort | Various | P2 | same |
 
-Full unimplemented catalog (40+ entries): [`unimplemented-ciphers.md`](unimplemented-ciphers.md).
+**Recently implemented:** Pigpen (`pigpen-standard`), Scytale (`scytale-d5`), Nihilist (`nihilist-31415`), Hex (`hex-utf8`), Manchester (`manchester-ieee`).
+
+Full unimplemented catalog (35+ entries): [`unimplemented-ciphers.md`](unimplemented-ciphers.md).

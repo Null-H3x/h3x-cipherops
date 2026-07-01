@@ -377,7 +377,7 @@ def _unsolved_attacks(fingerprint: dict, kasiski: dict) -> dict[str, dict]:
 
 
 FAMILY_GROUPS = {
-    "monoalphabetic": {"atbash", "caesar", "affine", "substitution", "polybius", "homophonic", "nomenclator"},
+    "monoalphabetic": {"atbash", "caesar", "affine", "substitution", "polybius", "homophonic", "nomenclator", "pigpen"},
     "polyalphabetic": {
         "vigenere",
         "beaufort",
@@ -386,10 +386,10 @@ FAMILY_GROUPS = {
         "noita-eye",
     },
     "non_periodic_polyalphabetic": {"autokey", "running_key"},
-    "transposition": {"railfence", "columnar"},
+    "transposition": {"railfence", "columnar", "scytale"},
     "polygraphic": {"playfair", "four_square", "hill"},
     "fractionated": {"adfgx", "adfgvx", "bifid", "trifid", "straddle_checkerboard", "fractionated_morse"},
-    "encoding": {"base64", "baconian", "pam5"},
+    "encoding": {"base64", "baconian", "pam5", "hex", "manchester"},
 }
 
 
