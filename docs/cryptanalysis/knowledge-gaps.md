@@ -43,10 +43,10 @@ For cipher coverage see [`taxonomy-gap-map.md`](taxonomy-gap-map.md). For attack
 
 **Gap:** Largest practical hole for "CipherOps" product vision.
 
-### LLM training readiness (improving)
+### Property profile coverage (improving)
 
-- 479 property profiles with consistent schema
-- Autokey Q&A and docs now teach non-periodic behavior
+- Consistent schema across fingerprinted and unsolved records
+- Autokey docs now teach non-periodic behavior
 - No negative/contrastive examples (Vigenère vs autokey same IC regime)
 
 **Gap:** Classifier labels, solver-verified attack outcomes, richer Q&A per family.

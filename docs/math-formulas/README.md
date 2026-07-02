@@ -1,12 +1,12 @@
 # Math Formulas Documentation
 
-Mathematical definitions, variables, and validated Python implementations for classical ciphers used in LLM pre-training.
+Mathematical definitions, variables, and validated Python implementations for classical ciphers used in CipherOps.
 
 ## Core Reference
 
 | File | Description |
 |------|-------------|
-| [`../variable-inventory.md`](../variable-inventory.md) | **Full variable & field inventory** (datasets, properties, ground truth) |
+| [`../variable-inventory.md`](../variable-inventory.md) | **Full variable & field inventory** (datasets, properties, cipher registry) |
 | `definitions.md` | Universal notation (P, C, K, x, k) |
 | `cipher-families.md` | Cipher taxonomy and quick reference |
 | `encodings-catalog.md` | Line codes & radix encodings (PAM-5, NRZ, Manchester, …) |

@@ -1,4 +1,0 @@
-{"id": 1, "input": "", "instruction": "What is Kerckhoffs's principle?", "output": "A cryptosystem should remain secure even if everything about the system except the key is known to the attacker."}
-{"id": 2, "input": "", "instruction": "Explain symmetric vs asymmetric encryption.", "output": "Symmetric uses one key (AES); asymmetric uses public/private pairs (RSA)."}
-{"id": 3, "input": "", "instruction": "What is a one-way function?", "output": "Easy to compute forward but infeasible to invert \u2014 basis for hash functions."}
-{"id": 4, "input": "", "instruction": "What does IND-CPA security mean?", "output": "Ciphertexts of chosen plaintexts are indistinguishable; probabilistic encryption like AES-CBC achieves this."}

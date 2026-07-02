@@ -66,9 +66,9 @@ See [`../variable-inventory.md`](../variable-inventory.md) §5.
 
 ---
 
-## LLM training note
+## Classifier note
 
-Profiles for these families intentionally contradict generic polyalphabetic heuristics. Models should learn:
+Profiles for these families intentionally contradict generic polyalphabetic heuristics. The classifier and UI should:
 
 1. Read `analysis_guidance` before recommending Kasiski/Friedman.
 2. Autokey long-body IC near English is **expected**, not evidence of monoalphabetic substitution.

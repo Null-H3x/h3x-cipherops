@@ -54,14 +54,43 @@ def audit_script_paths(report: ParanoiaReport) -> None:
     for name in (
         "generate_datasets.py",
         "validate_datasets.py",
-        "build_ground_truth.py",
+        "build_cipher_registry.py",
         "import_eyes_corpus.py",
     ):
         text = (ROOT / "scripts" / name).read_text(encoding="utf-8")
-        if 'Path("datasets' in text or 'Path("Pre-LLM' in text:
+        if 'Path("datasets' in text:
             report.fail(f"{name} still uses cwd-relative Path(...) — must use ROOT")
         elif "ROOT" not in text and name != "import_eyes_corpus.py":
             report.warn(f"{name}: no ROOT constant (verify path handling)")
+
+
+def audit_cipher_registry(report: ParanoiaReport) -> None:
+    """Cipher registry must exist and include the unsolved Noita corpus."""
+    registry_path = ROOT / "datasets/cipher-registry.jsonl"
+    if not registry_path.is_file():
+        report.fail(f"Missing cipher registry: {registry_path}")
+        return
+
+    records = []
+    for line in registry_path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            records.append(json.loads(line))
+
+    from cipherops.ciphers.registry import CIPHER_REGISTRY
+
+    solved = [r for r in records if r.get("status", "solved") == "solved"]
+    unsolved = [r for r in records if r.get("status") == "unsolved"]
+    if len(solved) != len(CIPHER_REGISTRY):
+        report.fail(
+            f"Cipher registry solved count {len(solved)} != implementation registry {len(CIPHER_REGISTRY)}"
+        )
+    else:
+        report.ok(f"Cipher registry aligned ({len(solved)} solved variants)")
+
+    if not any(r.get("variant_slug") == "noita-eye-messages" for r in unsolved):
+        report.fail("Cipher registry missing unsolved noita-eye-messages corpus")
+    else:
+        report.ok(f"Cipher registry unsolved corpora: {len(unsolved)}")
 
 
 def audit_cwd_independent_scripts(report: ParanoiaReport) -> None:
@@ -81,39 +110,6 @@ def audit_cwd_independent_scripts(report: ParanoiaReport) -> None:
         report.fail("validate_datasets.py from /tmp: unexpected output (ROOT not used?)")
     else:
         report.ok("validate_datasets.py succeeds from /tmp (ROOT-anchored paths)")
-
-
-def audit_qna_overrides(report: ParanoiaReport) -> None:
-    """Rich Q&A overrides must exist and merge in build_ground_truth."""
-    overrides_path = ROOT / "Pre-LLM-Ingestion/processed/cipher-qna-overrides.jsonl"
-    if not overrides_path.is_file():
-        report.fail(f"Missing Q&A overrides: {overrides_path}")
-        return
-
-    overrides = {}
-    for line in overrides_path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            row = json.loads(line)
-            overrides[row["variant_slug"]] = row
-
-    required = {"autokey-standard", "autokey-beaufort", "running-key-book"}
-    missing = required - set(overrides)
-    if missing:
-        report.fail(f"Q&A overrides missing slugs: {sorted(missing)}")
-    else:
-        report.ok(f"Q&A overrides present for {len(overrides)} variants")
-
-    qna_path = ROOT / "Pre-LLM-Ingestion/processed/cipher-qna-ground-truth.jsonl"
-    if not qna_path.is_file():
-        report.fail(f"Missing Q&A ground truth: {qna_path}")
-        return
-
-    qna_text = qna_path.read_text(encoding="utf-8")
-    for slug in required:
-        if overrides[slug]["output"][:60] not in qna_text:
-            report.fail(f"Q&A ground truth missing override content for {slug}")
-        else:
-            report.ok(f"Q&A ground truth includes override for {slug}")
 
 
 def audit_non_periodic_properties(report: ParanoiaReport) -> None:
@@ -232,7 +228,7 @@ def main() -> int:
     report = ParanoiaReport()
     audit_script_paths(report)
     audit_cwd_independent_scripts(report)
-    audit_qna_overrides(report)
+    audit_cipher_registry(report)
     audit_non_periodic_properties(report)
     audit_analysis_edge_cases(report)
     if not report.errors:

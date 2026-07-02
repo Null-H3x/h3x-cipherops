@@ -1,3 +1,4 @@
 # Minimal deps for cipher implementations and dataset validation (CI + local audit)
 cryptography>=42.0.0
 numpy>=1.26.0
+click>=8.1.0

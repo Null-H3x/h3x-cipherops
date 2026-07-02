@@ -1,8 +1,8 @@
 # Variable Inventory
 
-Complete reference of symbols, fields, and parameters tracked across H3X CipherOps — from mathematical notation through datasets, property profiles, and ground truth.
+Complete reference of symbols, fields, and parameters tracked across H3X CipherOps — from mathematical notation through datasets, property profiles, and the cipher registry.
 
-**Scope:** 57 solved cipher variants (570 fingerprinted records) + 1 unsolved corpus (9 Noita eye messages) + 579 ciphertext property profiles.
+**Scope:** 77 solved cipher variants (770 fingerprinted records) + 1 unsolved corpus (9 Noita eye messages) + property profiles per record.
 
 ---
 
@@ -19,7 +19,7 @@ datasets/unsolved/           Ciphertext-only corpora
 datasets/ciphertext-properties/   Fingerprint, frequency, Kasiski, coset IC, attacks
 docs/cryptanalysis/               Grounded cryptanalysis reference (methods, keyspace, isomorphs)
         ↓
-Pre-LLM-Ingestion/processed/      Audited ground-truth registry
+datasets/cipher-registry.jsonl   Cross-links math ↔ implementations ↔ datasets
 ```
 
 Each record links upward via `math_ref`, sideways via `id`, and downward via `properties_path`.
@@ -293,9 +293,9 @@ These slots reserve structure for future crib-drag, brute-force, dictionary, hil
 
 ---
 
-## 6. Ground truth registry
+## 6. Cipher registry
 
-Path: `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` — **58 records** (57 solved variants + 1 unsolved corpus).
+Path: `datasets/cipher-registry.jsonl` — **78 records** (77 solved variants + 1 unsolved corpus).
 
 | Field | Description |
 |-------|-------------|
@@ -311,24 +311,13 @@ Path: `Pre-LLM-Ingestion/processed/cipher-ground-truth.jsonl` — **58 records**
 | `status` | `solved` \| `unsolved` |
 | `source_repo` | External repo URL (unsolved only) |
 
-### Q&A ground truth (`cipher-qna-ground-truth.jsonl`)
-
-Additional fields for instruction tuning:
-
-| Field | Description |
-|-------|-------------|
-| `instruction` | Prompt |
-| `input` | Context (often empty) |
-| `output` | Expected response |
-| `math_ref` | Linked formula doc |
-| `cipher_family` | — |
-| `status` | Present on unsolved rows |
+Regenerate: `PYTHONPATH=. python3 scripts/build_cipher_registry.py`
 
 ---
 
 ## 7. Cipher-specific `params` keys
 
-Parameters stored on every dataset record and ground-truth row.
+Parameters stored on every dataset record and cipher-registry row.
 
 | Family / slug pattern | Param keys |
 |-----------------------|------------|
@@ -411,7 +400,7 @@ Parameters stored on every dataset record and ground-truth row.
 | Fingerprinted datasets | 570 | plaintext, ciphertext, validation hashes |
 | Unsolved datasets | 9 | integer ciphertext, header anomaly, σ₀ targets |
 | Ciphertext properties | 579 | fingerprint, frequency, kasiski, coset_ic, analysis_guidance, ngrams, patterns, attacks |
-| Ground truth | 58 | cross-links math ↔ data ↔ properties |
+| Cipher registry | 78 | cross-links math ↔ data ↔ properties |
 
 ---
 
@@ -440,4 +429,4 @@ PYTHONPATH=. python3 scripts/comprehensive_validate.py --deep
 PYTHONPATH=. python3 scripts/paranoia_audit.py
 ```
 
-See also: [`datasets/ciphertext-properties/README.md`](../datasets/ciphertext-properties/README.md), [`Pre-LLM-Ingestion/README.md`](../Pre-LLM-Ingestion/README.md).
+See also: [`datasets/ciphertext-properties/README.md`](../datasets/ciphertext-properties/README.md), [`datasets/unsolved/README.md`](../datasets/unsolved/README.md).

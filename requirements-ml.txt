@@ -1,0 +1,14 @@
+# Optional ML / fine-tuning stack (not required for the puzzle solver)
+-r requirements.txt
+
+transformers>=4.40.0
+peft>=0.11.0
+bitsandbytes>=0.42.0
+accelerate>=0.29.0
+torch>=2.2.0
+sentencepiece>=0.2.0
+datasets>=2.18.0
+pandas>=2.2.0
+rich>=13.7.0
+evaluate>=0.4.2
+scikit-learn>=1.4.0

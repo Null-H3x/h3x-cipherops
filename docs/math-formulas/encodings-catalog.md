@@ -1,6 +1,6 @@
 # Encodings Catalog
 
-Line codes, radix encodings, and physical-layer mappings — **distinct from ciphers** (no secret key). This repo implements a subset as fingerprinted datasets for LLM training; others are reference-only.
+Line codes, radix encodings, and physical-layer mappings — **distinct from ciphers** (no secret key). This repo implements a subset as fingerprinted datasets; others are reference-only.
 
 **Implemented:** Base64, Baconian, PAM-5 dibit, Hex (UTF-8), Manchester (IEEE 802.3).  
 **See also:** [`cipher-families.md`](cipher-families.md), [`unimplemented-ciphers.md`](unimplemented-ciphers.md).

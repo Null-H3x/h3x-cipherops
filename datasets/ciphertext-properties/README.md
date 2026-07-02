@@ -1,6 +1,6 @@
 # Ciphertext Properties Dataset
 
-Cryptanalytic metadata computed for every record in the fingerprinted and unsolved corpora. Each `properties.jsonl` row links to its source ciphertext by `id` and includes measurable features plus attack-surface hints for downstream LLM training and CipherOps tooling.
+Cryptanalytic metadata computed for every record in the fingerprinted and unsolved corpora. Each `properties.jsonl` row links to its source ciphertext by `id` and includes measurable features plus attack-surface hints for the classifier and solver UI.
 
 ## Layout
 

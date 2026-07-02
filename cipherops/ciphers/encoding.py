@@ -1,4 +1,4 @@
-"""Encoding schemes treated as ciphers in the training corpus."""
+"""Encoding schemes treated as first-class cipher variants in the registry."""
 
 from __future__ import annotations
 

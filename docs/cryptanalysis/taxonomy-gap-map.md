@@ -20,7 +20,7 @@ Cross-reference of **what this repo implements** vs **what classical/modern taxo
 
 ## Tier P0 — Implemented and audited
 
-These have `cipherops` implementation, fingerprinted dataset, math doc, ground truth, and property profiles.
+These have `cipherops` implementation, fingerprinted dataset, math doc, cipher registry entry, and property profiles.
 
 | Family | Variants | Difficulty | Cryptanalysis doc depth |
 |--------|----------|------------|-------------------------|
@@ -174,7 +174,7 @@ These are **documented as out-of-scope** unless a specific corpus or training ne
 
 11. Extended 81-type taxonomy mostly unimplemented (expected).
 12. Side-channel attack metadata generic for classical ciphers.
-13. Q&A ground truth boilerplate for most families.
+13. Cipher registry boilerplate for most families.
 
 ---
 

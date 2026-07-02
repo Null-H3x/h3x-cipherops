@@ -6,7 +6,7 @@ Features:
 - Classification: heuristic cipher detection
 - Decoding: ROT, Base*, XOR decoders
 - Conversion: hex ↔ base64 ↔ bin ↔ ASCII
-- Brute-force: parallel key search with hints from fine-tuned LLMs
+- Brute-force: parallel key search with heuristic scoring
 """
 
 __version__ = "0.1.0"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate datasets, ground truth, and run full validation."""
+"""Regenerate datasets, cipher registry, and run full validation."""
 
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def main() -> int:
         [sys.executable, "scripts/generate_ciphertext_properties.py"],
         label="Generate ciphertext property profiles",
     )
-    run([sys.executable, "scripts/build_ground_truth.py"], label="Build ground truth")
+    run([sys.executable, "scripts/build_cipher_registry.py"], label="Build cipher registry")
     run([sys.executable, "scripts/validate_datasets.py"], label="Validate datasets")
     run(
         [sys.executable, "scripts/validate_ciphertext_properties.py"],

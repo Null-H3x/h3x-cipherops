@@ -14,10 +14,7 @@ The primary stress test is **[Noita Eyes](https://github.com/Null-H3x/Eyes)** �
    Browser UI for real cryptanalysis sessions: fingerprint unknown text, pick or auto-suggest a cipher family, run propagators and decoders, pin cribs, and watch findings converge (or stop with suggestions).
 
 2. **Validated cipher engine (`cipherops/`)**  
-   77+ reversible cipher implementations, statistical profiling, and **constraint propagators** that emit mathematically checkable findings — not LLM guesses.
-
-3. **Optional LLM layer (later)**  
-   A model may propose cribs or hypotheses; the engine accepts or rejects them. This repo does not treat constraint-findings JSONL as training data — it is too sparse and repetitive for fine-tuning.
+   77+ reversible cipher implementations, statistical profiling, and **constraint propagators** that emit mathematically checkable findings.
 
 ---
 
@@ -86,7 +83,7 @@ PYTHONPATH=. python3 scripts/constraint_audit.py
 PYTHONPATH=. python3 scripts/paranoia_audit.py
 ```
 
-Regenerate datasets and ground truth:
+Regenerate datasets and cipher registry:
 
 ```bash
 PYTHONPATH=. python3 scripts/sync_repo.py
@@ -138,6 +135,7 @@ h3x-cipherops/
 │   ├── analysis/               # Profiling (fingerprint, Kasiski, attacks)
 │   └── cli.py                  # Headless CLI
 ├── datasets/
+│   ├── cipher-registry.jsonl   # Cross-links math ↔ implementations ↔ datasets
 │   ├── fingerprinted/          # Roundtrip-verified cipher samples (regression)
 │   ├── constraint-findings/    # Audited propagation outputs (oracle, not training)
 │   ├── ciphertext-properties/  # Statistical profiles per record
@@ -158,6 +156,7 @@ h3x-cipherops/
 
 | Corpus | Path | Purpose |
 |--------|------|---------|
+| Cipher registry | `datasets/cipher-registry.jsonl` | Links variants to math docs, datasets, and property profiles |
 | Fingerprinted ciphers | `datasets/fingerprinted/` | Prove implementations; demo known families in the UI |
 | Noita eye messages | `datasets/unsolved/noita-eye-messages/` | Primary unsolved puzzle (9 messages, deck size 83) |
 | Constraint findings | `datasets/constraint-findings/` | Reproducible propagation audit trail |
@@ -179,9 +178,6 @@ Math docs: [`docs/math-formulas/`](docs/math-formulas/). Cryptanalysis reference
 - [ ] **Noita solver session** — partial keystream map, column coverage, crib-drag helpers
 - [ ] **Crib-drag engine** — try word lists at offsets across all nine messages
 - [ ] Runnable attack execution (beyond schema/heuristics)
-- [ ] Optional LLM hypothesis proposer (engine remains source of truth)
-
-Legacy / optional: LoRA fine-tuning scripts and Pre-LLM ingestion remain in the repo but are not the primary direction.
 
 ---
 

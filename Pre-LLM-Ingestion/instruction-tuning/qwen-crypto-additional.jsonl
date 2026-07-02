@@ -1,4 +1,0 @@
-{"id": 5, "input": "", "instruction": "What is the RSA key generation process?", "output": "1) Choose two large primes p and q. 2) Compute n=p*q and phi(n)=(p-1)*(q-1). 3) Choose e coprime to phi(n). 4) Compute d=e^-1 mod phi(n). Public key=(n,e), private=(n,d)"}
-{"id": 6, "input": "", "instruction": "What is a birthday attack?", "output": "Exploits birthday paradox: collisions appear with ~50% probability when samples reach sqrt(N) for N output space. For 128-bit hash, collision search takes ~2^64 operations."}
-{"id": 7, "input": "", "instruction": "What does forward secrecy mean?", "output": "Past communications remain secure if long-term keys are compromised. Achieved via ephemeral key exchange (DHE/ECDHE) in TLS."}
-{"id": 8, "input": "", "instruction": "Explain AES-GCM as an AEAD cipher.", "output": "AES-GCM combines CTR encryption with Galois field authentication. Provides both confidentiality and integrity in one operation, supporting associated data (AAD)."}

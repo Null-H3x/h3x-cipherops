@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATASET_ROOT = ROOT / "datasets" / "fingerprinted"
 UNSOLVED_ROOT = ROOT / "datasets" / "unsolved"
 PROPERTIES_ROOT = ROOT / "datasets" / "ciphertext-properties"
-GROUND_TRUTH = ROOT / "Pre-LLM-Ingestion" / "processed" / "cipher-ground-truth.jsonl"
+CIPHER_REGISTRY_JSONL = ROOT / "datasets" / "cipher-registry.jsonl"
 MANIFEST = DATASET_ROOT / "manifest.json"
 UNSOLVED_MANIFEST = UNSOLVED_ROOT / "manifest.json"
 PROPERTIES_MANIFEST = PROPERTIES_ROOT / "manifest.json"
@@ -100,12 +100,12 @@ def validate_manifest(report: ValidationReport) -> None:
         report.ok(f"Manifest aligned with registry ({len(manifest)} entries)")
 
 
-def validate_ground_truth(report: ValidationReport) -> None:
-    if not GROUND_TRUTH.is_file():
-        report.fail(f"Missing ground truth: {GROUND_TRUTH}")
+def validate_cipher_registry(report: ValidationReport) -> None:
+    if not CIPHER_REGISTRY_JSONL.is_file():
+        report.fail(f"Missing cipher registry: {CIPHER_REGISTRY_JSONL}")
         return
 
-    records = [json.loads(line) for line in GROUND_TRUTH.read_text().splitlines() if line.strip()]
+    records = [json.loads(line) for line in CIPHER_REGISTRY_JSONL.read_text().splitlines() if line.strip()]
     solved_records = [r for r in records if r.get("status", "solved") == "solved"]
     unsolved_records = [r for r in records if r.get("status") == "unsolved"]
     gt_solved_slugs = {r["variant_slug"] for r in solved_records}
@@ -113,24 +113,24 @@ def validate_ground_truth(report: ValidationReport) -> None:
 
     if gt_solved_slugs != registry_slugs:
         report.fail(
-            f"Ground truth slug mismatch. missing={sorted(registry_slugs - gt_solved_slugs)} "
+            f"Cipher registry slug mismatch. missing={sorted(registry_slugs - gt_solved_slugs)} "
             f"extra={sorted(gt_solved_slugs - registry_slugs)}"
         )
     else:
-        report.ok(f"Ground truth aligned ({len(solved_records)} solved records)")
+        report.ok(f"Cipher registry aligned ({len(solved_records)} solved records)")
 
     if unsolved_records:
-        report.ok(f"Ground truth unsolved corpora: {len(unsolved_records)}")
+        report.ok(f"Cipher registry unsolved corpora: {len(unsolved_records)}")
 
     for record in solved_records:
         spec = get_cipher(record["variant_slug"])
         if record["math_ref"] != spec.math_ref:
-            report.fail(f"Ground truth math_ref mismatch for {record['variant_slug']}")
+            report.fail(f"Cipher registry math_ref mismatch for {record['variant_slug']}")
         if record["cipher_family"] != spec.family:
-            report.fail(f"Ground truth family mismatch for {record['variant_slug']}")
+            report.fail(f"Cipher registry family mismatch for {record['variant_slug']}")
         expected_props = f"datasets/ciphertext-properties/{record['variant_slug']}/properties.jsonl"
         if record.get("properties_path") != expected_props:
-            report.fail(f"Ground truth properties_path mismatch for {record['variant_slug']}")
+            report.fail(f"Cipher registry properties_path mismatch for {record['variant_slug']}")
 
     for record in unsolved_records:
         math_path = ROOT / record["math_ref"]
@@ -486,7 +486,7 @@ def main() -> int:
     report = ValidationReport()
     validate_registry(report)
     validate_manifest(report)
-    validate_ground_truth(report)
+    validate_cipher_registry(report)
     validate_plaintext_corpus(report)
     validate_datasets(report)
     validate_unsolved_datasets(report)
