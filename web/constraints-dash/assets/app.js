@@ -76,6 +76,7 @@ function clearVerbose() {
 
 function log(msg) {
   const el = $("log");
+  if (!el) return;
   const ts = new Date().toISOString().slice(11, 19);
   el.textContent += `[${ts}] ${msg}\n`;
   el.scrollTop = el.scrollHeight;
@@ -83,6 +84,7 @@ function log(msg) {
 
 function setStatus(kind, text) {
   const pill = $("status-pill");
+  if (!pill) return;
   pill.className = `pill pill-${kind}`;
   pill.textContent = text;
 }
@@ -146,14 +148,20 @@ function mergePins(existing, incoming) {
 
 function setPinsJson(pins, hintText) {
   const field = $("pins-json");
+  if (!field) {
+    verboseWrite("warn", "Crib pins field (#pins-json) not found in page");
+    return;
+  }
   field.value = JSON.stringify(pins, null, 2);
   field.classList.add("pins-json-highlight");
   setTimeout(() => field.classList.remove("pins-json-highlight"), 1800);
   if (hintText) {
     const hint = $("pins-json-hint");
-    hint.textContent = hintText;
-    hint.classList.add("flash");
-    setTimeout(() => hint.classList.remove("flash"), 2500);
+    if (hint) {
+      hint.textContent = hintText;
+      hint.classList.add("flash");
+      setTimeout(() => hint.classList.remove("flash"), 2500);
+    }
   }
   field.scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -411,18 +419,25 @@ function renderPrepare(prepare) {
   const cribsEl = $("prepare-cribs");
   const statusEl = $("prepare-status");
 
-  if (!prepare) {
-    stepsEl.innerHTML = '<p class="classify-status">Route a hypothesis to run prepare.</p>';
-    notesEl.textContent = "";
-    depthEl.classList.add("hidden");
-    cribsEl.classList.add("hidden");
-    statusEl.textContent = "Waiting for route";
+  if (!stepsEl) {
+    verboseWrite("warn", "Prepare panel missing from page — refresh browser cache");
     return;
   }
 
-  statusEl.textContent = prepare.peeled
-    ? "Preflight complete · encoding peeled"
-    : `Preflight complete · ${prepare.pins?.length ?? 0} pin(s)`;
+  if (!prepare) {
+    stepsEl.innerHTML = '<p class="classify-status">Route a hypothesis to run prepare.</p>';
+    if (notesEl) notesEl.textContent = "";
+    if (depthEl) depthEl.classList.add("hidden");
+    if (cribsEl) cribsEl.classList.add("hidden");
+    if (statusEl) statusEl.textContent = "Waiting for route";
+    return;
+  }
+
+  if (statusEl) {
+    statusEl.textContent = prepare.peeled
+      ? "Preflight complete · encoding peeled"
+      : `Preflight complete · ${prepare.pins?.length ?? 0} pin(s)`;
+  }
 
   stepsEl.innerHTML = "";
   (prepare.steps || []).forEach((step) => {
@@ -445,21 +460,22 @@ function renderPrepare(prepare) {
     stepsEl.appendChild(card);
   });
 
-  notesEl.textContent = (prepare.notes || []).join(" · ");
+  if (notesEl) notesEl.textContent = (prepare.notes || []).join(" · ");
 
   const depth = prepare.depth_preview;
-  if (depth && depth.top_crib_drag_depths?.length) {
+  if (depthEl && depth && depth.top_crib_drag_depths?.length) {
     depthEl.classList.remove("hidden");
     depthEl.innerHTML = `
-      <p class="prepare-subhead">Depth map · ${depth.num_messages} msgs · header ${depth.header_detected ? "✓" : "—"}</p>
-      <p class="prepare-meta">Crib-drag depths: ${depth.top_crib_drag_depths.slice(0, 10).join(", ")}</p>
+      <p class="prepare-subhead">Depth map · ${escapeHtml(depth.num_messages)} msgs · header ${depth.header_detected ? "✓" : "—"}</p>
+      <p class="prepare-meta">Crib-drag depths: ${escapeHtml(depth.top_crib_drag_depths.slice(0, 10).join(", "))}</p>
     `;
-  } else {
+  } else if (depthEl) {
     depthEl.classList.add("hidden");
+    depthEl.innerHTML = "";
   }
 
   const cribs = prepare.crib_candidates || [];
-  if (cribs.length) {
+  if (cribsEl && cribs.length) {
     cribsEl.classList.remove("hidden");
     cribsEl.innerHTML = '<p class="prepare-subhead">Dictionary cribs</p>';
     cribs.slice(0, 5).forEach((c, idx) => {
@@ -475,8 +491,9 @@ function renderPrepare(prepare) {
       });
       cribsEl.appendChild(btn);
     });
-  } else {
+  } else if (cribsEl) {
     cribsEl.classList.add("hidden");
+    cribsEl.innerHTML = "";
   }
 
   if (prepare.pins?.length) {
@@ -491,6 +508,11 @@ async function handleRunResponse(data) {
   state.offset = 0;
   state.lastConfig = data.config;
 
+  if (data.route) {
+    state.routedIndex = data.route.hypothesis_index;
+    setInferred(data.route);
+  }
+
   if (data.prepare) {
     renderPrepare(data.prepare);
     verboseWrite("ok", "Prepare complete", data.prepare.notes);
@@ -502,17 +524,13 @@ async function handleRunResponse(data) {
     renderClassification(data.classification);
     verboseWrite("info", "Re-classified after encoding peel");
     if (data.prepare?.ciphertext) {
-      $("ciphertext").value = data.prepare.ciphertext;
+      const ctField = $("ciphertext");
+      if (ctField) ctField.value = data.prepare.ciphertext;
     }
   }
 
   if (data.actionable_kinds) {
     state.actionableKinds = new Set(data.actionable_kinds);
-  }
-
-  if (data.route) {
-    state.routedIndex = data.route.hypothesis_index;
-    setInferred(data.route);
   }
 
   log(`Done: ${data.findings_count} findings, ${data.validated_count} validated, converged=${data.summary?.converged}`);
@@ -527,9 +545,18 @@ async function handleRunResponse(data) {
   if (data.plaintext_view) {
     renderPlaintextView(data.plaintext_view);
   } else {
-    await fetchPlaintextView();
+    try {
+      await fetchPlaintextView();
+    } catch (err) {
+      verboseWrite("warn", "Plaintext view fetch skipped", err.message);
+    }
   }
-  await fetchFindings();
+  try {
+    await fetchFindings();
+  } catch (err) {
+    verboseWrite("error", "Findings fetch failed", err.message);
+    throw err;
+  }
   updateBruteHint(data.summary?.stop);
   if (!data.summary?.stop) setStatus("ok", "READY");
 }
@@ -868,9 +895,9 @@ async function runClassification() {
 }
 
 function bindEvents() {
-  $("classify-btn").addEventListener("click", runClassification);
+  $("classify-btn")?.addEventListener("click", runClassification);
 
-  $("ciphertext").addEventListener("input", () => {
+  $("ciphertext")?.addEventListener("input", () => {
     if (state.classification) {
       state.classification = null;
       state.routedIndex = null;
@@ -881,22 +908,22 @@ function bindEvents() {
     }
   });
 
-  $("apply-crib-btn").addEventListener("click", () => {
+  $("apply-crib-btn")?.addEventListener("click", () => {
     applyCribFromSelected(true).catch((e) => log(`Crib error: ${e.message}`));
   });
-  $("crib-anchor-pt").addEventListener("change", () => {
+  $("crib-anchor-pt")?.addEventListener("change", () => {
     if (state.selectedFinding) showFindingDetail(state.selectedFinding);
   });
 
   ["filter-kind", "filter-confidence", "filter-round"].forEach((id) => {
-    $(id).addEventListener("change", () => {
+    $(id)?.addEventListener("change", () => {
       state.offset = 0;
       fetchFindings().catch((e) => log(e.message));
     });
   });
 
   let searchTimer;
-  $("filter-q").addEventListener("input", () => {
+  $("filter-q")?.addEventListener("input", () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
       state.offset = 0;
@@ -904,18 +931,18 @@ function bindEvents() {
     }, 300);
   });
 
-  $("page-prev").addEventListener("click", () => {
+  $("page-prev")?.addEventListener("click", () => {
     state.offset = Math.max(0, state.offset - state.limit);
     fetchFindings().catch((e) => log(e.message));
   });
 
-  $("page-next").addEventListener("click", () => {
+  $("page-next")?.addEventListener("click", () => {
     state.offset += state.limit;
     fetchFindings().catch((e) => log(e.message));
   });
 
-  $("brute-run-btn").addEventListener("click", runBruteForce);
-  $("verbose-clear").addEventListener("click", clearVerbose);
+  $("brute-run-btn")?.addEventListener("click", runBruteForce);
+  $("verbose-clear")?.addEventListener("click", clearVerbose);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

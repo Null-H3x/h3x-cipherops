@@ -143,7 +143,10 @@ export PYTHONPATH="$ROOT"
 
 if [[ "$VALIDATE" -eq 1 ]]; then
   echo "==> Running constraint propagator audit"
-  "$PY" "$ROOT/scripts/constraint_audit.py"
+  if ! "$PY" "$ROOT/scripts/constraint_audit.py"; then
+    echo "WARNING: constraint audit failed — starting UI anyway" >&2
+    echo "  Fix: PYTHONPATH=$ROOT $PY scripts/constraint_audit.py" >&2
+  fi
 fi
 
 if [[ "$SETUP_ONLY" -eq 1 ]]; then
@@ -155,6 +158,17 @@ fi
 if [[ ! -d "$ROOT/web/constraints-dash" ]]; then
   echo "ERROR: missing web/constraints-dash — are you in the repo root?" >&2
   exit 1
+fi
+
+SERVE="$ROOT/scripts/serve_constraints_dash.py"
+if [[ ! -f "$SERVE" ]]; then
+  echo "ERROR: missing $SERVE" >&2
+  exit 1
+fi
+
+if command -v ss >/dev/null 2>&1 && ss -ltn "( sport = :$PORT )" 2>/dev/null | grep -q LISTEN; then
+  echo "WARNING: port $PORT already in use — dash may fail to bind" >&2
+  echo "  Try: ./run.sh --port $((PORT + 1))" >&2
 fi
 
 if [[ "$HOST" == "0.0.0.0" ]]; then
@@ -176,4 +190,4 @@ else
   echo ""
 fi
 
-exec "$PY" "$ROOT/scripts/serve_constraints_dash.py" --host "$HOST" --port "$PORT"
+exec "$PY" "$SERVE" --host "$HOST" --port "$PORT"
