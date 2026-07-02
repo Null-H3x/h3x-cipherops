@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import socket
 import sys
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -27,6 +28,47 @@ from cipherops.constraints.prepare_run import merge_prepare_into_payload, prepar
 
 # In-memory cache of last analysis per client session (uuid).
 _SESSION_CACHE: dict[str, dict[str, Any]] = {}
+
+
+class DashHTTPServer(ThreadingHTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+def _port_available(host: str, port: int) -> bool:
+    probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        probe.bind((host, port))
+        return True
+    except OSError:
+        return False
+    finally:
+        probe.close()
+
+
+def _pick_port(host: str, start: int, *, attempts: int = 20) -> int | None:
+    for offset in range(attempts):
+        port = start + offset
+        if _port_available(host, port):
+            return port
+    return None
+
+
+def _bind_error_message(host: str, port: int, exc: OSError) -> str:
+    err = exc.errno
+    if err in {98, 48, 10048}:  # EADDRINUSE (Linux, BSD, Windows)
+        return (
+            f"Port {port} on {host} is already in use.\n"
+            f"  • Stop the other dash: pkill -f serve_constraints_dash.py\n"
+            f"  • Or use another port: ./run.sh --port {port + 1}\n"
+            f"  • Or: PYTHONPATH=. python3 scripts/serve_constraints_dash.py --port {port + 1}"
+        )
+    if err in {13, 10013}:
+        return f"Permission denied binding to {host}:{port} (try port >= 1024 or run without sudo)."
+    if err in {99, 10049}:
+        return f"Cannot assign address {host}:{port} — check --host (use 127.0.0.1 or 0.0.0.0)."
+    return f"Could not bind {host}:{port}: {exc}"
 
 
 def _json_response(handler: BaseHTTPRequestHandler, status: int, payload: Any) -> None:
@@ -492,15 +534,43 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument(
+        "--auto-port",
+        action="store_true",
+        help="If --port is busy, try the next free port (up to +19)",
+    )
     args = parser.parse_args()
 
     if not WEB_ROOT.is_dir():
         print(f"Missing web root: {WEB_ROOT}", file=sys.stderr)
         return 1
 
-    server = ThreadingHTTPServer((args.host, args.port), DashHandler)
-    url = f"http://{args.host}:{args.port}/"
+    host = args.host
+    port = args.port
+    if not _port_available(host, port):
+        if args.auto_port:
+            picked = _pick_port(host, port)
+            if picked is None:
+                print(_bind_error_message(host, port, OSError(98, "Address in use")), file=sys.stderr)
+                return 1
+            if picked != port:
+                print(f"Port {port} busy — using {picked} instead.", file=sys.stderr)
+            port = picked
+        else:
+            print(_bind_error_message(host, port, OSError(98, "Address in use")), file=sys.stderr)
+            return 1
+
+    try:
+        server = DashHTTPServer((host, port), DashHandler)
+    except OSError as exc:
+        print(_bind_error_message(host, port, exc), file=sys.stderr)
+        return 1
+
+    display_host = "127.0.0.1" if host in {"0.0.0.0", ""} else host
+    url = f"http://{display_host}:{port}/"
     print(f"H3X Constraints Dash → {url}")
+    if host == "0.0.0.0":
+        print(f"  LAN: bind 0.0.0.0:{port} — open http://<machine-ip>:{port}/ from other devices")
     print("Press Ctrl+C to stop.")
     try:
         server.serve_forever()

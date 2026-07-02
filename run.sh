@@ -155,6 +155,45 @@ if [[ "$SETUP_ONLY" -eq 1 ]]; then
   exit 0
 fi
 
+port_is_free() {
+  local host="$1"
+  local port="$2"
+  if command -v ss >/dev/null 2>&1; then
+    ! ss -ltn "( sport = :$port )" 2>/dev/null | grep -q LISTEN
+    return
+  fi
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$host" "$port" <<'PY'
+import socket, sys
+host, port = sys.argv[1], int(sys.argv[2])
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    s.bind((host, port))
+except OSError:
+    sys.exit(1)
+finally:
+    s.close()
+PY
+    return
+  fi
+  return 0
+}
+
+pick_free_port() {
+  local host="$1"
+  local start="$2"
+  local p="$start"
+  local limit=$((start + 19))
+  while [[ "$p" -le "$limit" ]]; do
+    if port_is_free "$host" "$p"; then
+      echo "$p"
+      return 0
+    fi
+    p=$((p + 1))
+  done
+  return 1
+}
+
 if [[ ! -d "$ROOT/web/constraints-dash" ]]; then
   echo "ERROR: missing web/constraints-dash — are you in the repo root?" >&2
   exit 1
@@ -166,9 +205,14 @@ if [[ ! -f "$SERVE" ]]; then
   exit 1
 fi
 
-if command -v ss >/dev/null 2>&1 && ss -ltn "( sport = :$PORT )" 2>/dev/null | grep -q LISTEN; then
-  echo "WARNING: port $PORT already in use — dash may fail to bind" >&2
-  echo "  Try: ./run.sh --port $((PORT + 1))" >&2
+if ! picked="$(pick_free_port "$HOST" "$PORT")"; then
+  echo "ERROR: no free port found in range ${PORT}-$((PORT + 19))" >&2
+  echo "  Stop the old server: pkill -f serve_constraints_dash.py" >&2
+  exit 1
+fi
+if [[ "$picked" != "$PORT" ]]; then
+  echo "WARNING: port $PORT already in use — starting on $picked instead" >&2
+  PORT="$picked"
 fi
 
 if [[ "$HOST" == "0.0.0.0" ]]; then
@@ -190,4 +234,4 @@ else
   echo ""
 fi
 
-exec "$PY" "$SERVE" --host "$HOST" --port "$PORT"
+exec "$PY" "$SERVE" --host "$HOST" --port "$PORT" --auto-port
