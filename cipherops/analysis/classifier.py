@@ -411,6 +411,8 @@ def route_to_dash_payload(
     hypothesis_index: int = 0,
     *,
     ciphertext: str | None = None,
+    ciphertexts: list[list[int]] | None = None,
+    deck_size: int | None = None,
     pins: list[dict[str, Any]] | None = None,
     max_rounds: int = 10,
 ) -> dict[str, Any]:
@@ -436,18 +438,22 @@ def route_to_dash_payload(
     prop = h.get("dash_propagator") or h.get("propagator")
     if prop and prop != "none":
         payload["propagator"] = prop
-    if h.get("deck_size"):
-        payload["deck_size"] = h["deck_size"]
+    resolved_deck_size = deck_size or h.get("deck_size") or classification.get("deck_size")
+    if resolved_deck_size:
+        payload["deck_size"] = int(resolved_deck_size)
     if h.get("hypothesis"):
         payload["hypothesis"] = dict(h["hypothesis"])
 
     ct = (ciphertext or "").strip()
+    decks = ciphertexts
     if ct:
         payload["ciphertext"] = ct
+    elif decks:
+        payload["ciphertexts"] = decks
     elif classification.get("has_decks"):
         raise ValueError("Integer deck ciphertext required for this route")
 
-    if prop and prop != "none" and not ct and mode == "custom":
+    if prop and prop != "none" and not ct and not decks and mode == "custom":
         raise ValueError("Ciphertext required to route this hypothesis")
 
     return payload

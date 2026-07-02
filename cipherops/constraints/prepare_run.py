@@ -534,7 +534,9 @@ def prepare_run(
     work_decks = ciphertexts
     deck_size = h.get("deck_size")
 
-    if work_decks is None and work_ct:
+    if work_decks is not None:
+        work_ct = None
+    elif work_ct:
         parsed = parse_integer_decks(work_ct)
         if parsed:
             work_decks, inferred_size = parsed

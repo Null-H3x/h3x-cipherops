@@ -414,11 +414,11 @@ class DashHandler(BaseHTTPRequestHandler):
                     work_classification,
                     work_index,
                     ciphertext=work_ct,
+                    ciphertexts=work_decks,
+                    deck_size=(prepared or {}).get("deck_size") or payload.get("deck_size"),
                     pins=merged_pins,
                     max_rounds=int(payload.get("max_rounds", 10)),
                 )
-                if work_decks is not None:
-                    analyze_payload["ciphertexts"] = work_decks
                 if prepared:
                     analyze_payload = merge_prepare_into_payload(analyze_payload, prepared)
                 hyp_override = payload.get("hypothesis_override")
